@@ -20,7 +20,7 @@
 }
 
 code{
-  @apply text-[14.5px] bg-[#3d3d3d] p-[6px] rounded-[10px];
+  @apply text-[.875em] bg-[#3d3d3d] font-[500] py-[.15rem] px-[.3rem] rounded-[.25rem];
 }
 
 ul {
