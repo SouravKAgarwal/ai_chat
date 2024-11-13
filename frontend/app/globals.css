@@ -19,6 +19,10 @@
   opacity: 1;
 }
 
+code{
+  @apply text-[14.5px] bg-[#3d3d3d] p-[6px] rounded-[10px];
+}
+
 ul {
   @apply list-disc pl-4 pb-2 font-semibold;
 }
