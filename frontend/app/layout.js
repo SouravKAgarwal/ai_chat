@@ -5,6 +5,8 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
 import { Providers } from "./provider";
+import { useLoadUserQuery } from "@/redux/features/api/apiSlices";
+import Loading from "./components/Loading";
 
 const firaSans = Nunito({
   weight: ["300", "400", "500", "600", "700", "800"],
@@ -19,7 +21,7 @@ export default function RootLayout({ children }) {
       >
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
+            <Layout children={children} />
             <Toaster richColors />
           </ThemeProvider>
         </Providers>
@@ -27,3 +29,9 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
+const Layout = ({ children }) => {
+  const { isLoading } = useLoadUserQuery();
+
+  return <>{isLoading ? <Loading /> : <>{children}</>}</>;
+};
