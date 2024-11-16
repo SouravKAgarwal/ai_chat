@@ -166,22 +166,40 @@ export const formatResponse = (
             <Markdown>{explanation}</Markdown>
           </div>
         ))}
-      <div className="flex text-xl text-[#aaa] space-x-3 mt-2">
+      <div className="flex text-lg text-[#b4b4b4]">
         {conversation[index]?.refreshedResponses?.length > 0 && (
           <div className="flex items-center">
-            <button className="flex items-center" onClick={() => handlePrev()}>
+            <button
+              className={`flex items-center p-1 rounded-md ${
+                current === 1 ? "text-[#555]" : "hover:bg-[#2f2f2f]"
+              }`}
+              onClick={() => handlePrev()}
+              disabled={current === 1}
+            >
               <GrFormPrevious />
             </button>
-            <span className="text-[15px]">
+            <span className="text-[14.5px] font-semibold px-1.5">
               {current}/{conversation[index]?.refreshedResponses?.length + 1}
             </span>
-
-            <button className="flex items-center" onClick={() => handleNext()}>
+            <button
+              className={`flex items-center p-1 rounded-md ${
+                current >=
+                (conversation[index]?.refreshedResponses?.length || 0) + 1
+                  ? "text-[#555]"
+                  : "hover:bg-[#2f2f2f]"
+              }`}
+              onClick={() => handleNext()}
+              disabled={
+                current >=
+                (conversation[index]?.refreshedResponses?.length || 0) + 1
+              }
+            >
               <GrFormNext />
             </button>
           </div>
         )}
         <button
+          className="hover:bg-[#2f2f2f] p-1.5 rounded-md"
           onClick={() =>
             handleTextToSpeech(text, index, conversation, setConversation)
           }
@@ -193,14 +211,21 @@ export const formatResponse = (
           )}
         </button>
         <CopyToClipboard text={text}>
-          <button onClick={() => toast.success("Copied to clipboard!")}>
+          <button
+            className="hover:bg-[#2f2f2f] p-1.5 rounded-md"
+            onClick={() => toast.success("Copied to clipboard!")}
+          >
             <TbCopy />
           </button>
         </CopyToClipboard>
-        <button onClick={() => handleRefresh(index)}>
+        <button
+          className="hover:bg-[#2f2f2f] p-1.5 rounded-md"
+          onClick={() => handleRefresh(index)}
+        >
           <TbRefresh />
         </button>
       </div>
+
       {index === conversation.length - 1 && <div className="py-6" />}
     </>
   );

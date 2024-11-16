@@ -86,7 +86,7 @@ const Sidebar = ({
       }`}
     >
       {sidebarOpen && (
-        <div className="flex justify-between gap-4 items-center mb-4 px-2">
+        <div className="flex justify-between gap-4 items-center mb-4 py-2 px-2">
           <button onClick={toggleSidebar} className="text-[#ccc]">
             <BiMenuAltRight size={24} />
           </button>
@@ -167,12 +167,14 @@ const Sidebar = ({
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => setLogin(true)}
-              className="text-sm font-semibold text-gray-900 dark:text-white cursor-pointer"
-            >
-              <span>Log in &rarr;</span>
-            </button>
+            <div className="p-4">
+              <button
+                onClick={() => setLogin(true)}
+                className="text-sm font-semibold text-gray-900 dark:text-white cursor-pointer"
+              >
+                <span>Log in &rarr;</span>
+              </button>
+            </div>
           )}
         </div>
       )}

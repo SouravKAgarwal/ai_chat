@@ -9,9 +9,9 @@ import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import Login from "./auth/Login";
 import Register from "./auth/Register";
-import removeMarkdown from "markdown-to-text";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
-const Header = ({ title, toggleSidebar }) => {
+const Header = ({ toggleSidebar, sidebarOpen }) => {
   const [userLogout, setUserLogout] = useState(false);
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
@@ -39,8 +39,8 @@ const Header = ({ title, toggleSidebar }) => {
 
   if (mounted) {
     return (
-      <div className="fixed top-0 left-0 right-0 w-full z-30 bg-[#e8e3e3] dark:bg-[#2f2f2f]">
-        <header className="flex items-center justify-between px-6 py-2">
+      <div className="fixed top-0 left-0 right-0 w-full z-30 bg-[#e8e3e3] dark:bg-[#212121]">
+        <header className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center space-x-2">
             <button
               className="text-gray-600 dark:text-[#ccc]"
@@ -56,15 +56,13 @@ const Header = ({ title, toggleSidebar }) => {
             </Link>
           </div>
 
-          <div className="flex justify-center sm:justify-start">
+          <div
+            className={`w-full flex sm:justify-start ${
+              sidebarOpen ? "sm:ml-32 md:ml-48" : ""
+            } justify-center`}
+          >
             <span className="text-lg font-semibold block text-gray-900 dark:text-[#b4b4b4]">
               MyGPT
-            </span>
-          </div>
-
-          <div className="w-full flex-1 sm:flex hidden sm:justify-center">
-            <span className="text-lg font-semibold sm:block hidden text-gray-900 dark:text-[#b4b4b4]">
-              {removeMarkdown(title).trimEnd()}
             </span>
           </div>
 
@@ -76,15 +74,16 @@ const Header = ({ title, toggleSidebar }) => {
                   height={32}
                   src={user?.profileImage?.url}
                   alt={user?.username}
-                  className="w-8 h-8 rounded-full"
+                  className="w-10 h-8 rounded-full"
                 />
               </div>
             ) : (
               <button
                 onClick={() => setLogin(true)}
-                className="text-sm font-semibold text-gray-900 dark:text-white cursor-pointer"
+                className="flex w-[64px] items-center text-sm font-semibold text-gray-900 dark:text-white cursor-pointer space-x-2"
               >
-                <span>Log in &rarr;</span>
+                <span>Log in</span>
+                <ArrowRightIcon className="w-4 h-4" />
               </button>
             )}
           </div>

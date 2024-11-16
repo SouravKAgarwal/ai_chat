@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { formatResponse } from "../../utils";
 import { HiOutlineXMark } from "react-icons/hi2";
+import Markdown from "react-markdown";
 
 const ChatMessage = ({
   msg,
@@ -47,7 +48,7 @@ const ChatMessage = ({
       <div
         className={`${
           msg.sender === "human"
-            ? "self-end text-white bg-zinc-700 dark:bg-[#252525] text-sm rounded-t-2xl rounded-bl-2xl p-3"
+            ? "self-end text-white bg-gray-400 dark:bg-[#2f2f2f] text-sm rounded-t-2xl rounded-bl-2xl p-3 px-5"
             : "self-start text-sm rounded-t-2xl rounded-br-2xl p-2"
         }`}
       >
@@ -82,7 +83,9 @@ const ChatMessage = ({
                 />
               </div>
             )}
-            <span className="text-sm">{msg.message}</span>
+            <span className="text-sm whitespace-pre-wrap break-words">
+              {msg.message}
+            </span>
           </>
         )}
       </div>

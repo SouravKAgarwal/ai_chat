@@ -85,7 +85,7 @@ const ChatDetails = ({ chatId }) => {
           sidebarOpen && "ml-0 sm:ml-48 md:ml-64"
         }`}
       >
-        <Header title={title} toggleSidebar={toggleSidebar} />
+        <Header sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <ChatDetailsPage
           chatId={chatId}
           user={user}

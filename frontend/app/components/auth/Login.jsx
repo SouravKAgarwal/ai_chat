@@ -43,7 +43,7 @@ const Login = ({ login, setLogin, setRegister }) => {
     }
     if (error) {
       console.log(error);
-      // toast.error(error.data.message);
+      toast.error(error.data.message || error.message);
     }
   }, [isSuccess, error]);
 

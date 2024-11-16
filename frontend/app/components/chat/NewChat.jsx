@@ -171,7 +171,7 @@ const NewChat = ({ user }) => {
           sidebarOpen && "ml-0 sm:ml-48 md:ml-64"
         }`}
       >
-        <Header title={title} toggleSidebar={toggleSidebar} />
+        <Header sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <div className="flex flex-col h-full overflow-auto">
           <div className="flex-1 overflow-y-auto mt-16">
             <ChatWindow

@@ -46,9 +46,16 @@ const ChatInput = ({
     setImage(null);
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text");
+    const formattedText = pastedText.replace(/\r?\n/g, "\n");
+    setInput((prev) => prev + formattedText);
+  };
+
   return (
-    <div className="w-full flex justify-center max-h-64 overflow-hidden">
-      <div className="relative flex items-center rounded-[26px] p-2 bg-[#222121ee] w-full max-w-4xl overflow-hidden">
+    <div className="w-full flex justify-center max-h-96 overflow-hidden">
+      <div className="relative flex items-center rounded-[26px] p-2 bg-[#2f2f2f] w-full max-w-4xl overflow-hidden">
         <button className="absolute bottom-4 left-4 text-white font-bold">
           <label htmlFor="file-upload" className="cursor-pointer">
             <RiAttachmentLine size={20} />
@@ -67,7 +74,7 @@ const ChatInput = ({
             <div className="relative max-w-24 flex justify-start my-2 overflow-hidden max-h-24">
               <img
                 src={previewImage}
-                className="h-24 w-24 object-cover rounded-xl border-4 border-gray-400  hover:opacity-40"
+                className="h-24 w-24 object-cover rounded-xl border-4 border-gray-400 hover:opacity-40"
                 alt="preview-img"
               />
               <button
@@ -80,11 +87,12 @@ const ChatInput = ({
           )}
 
           <textarea
-            className="flex resize-none bg-transparent text-[#ddd] py-2 focus:outline-none min-w-0 flex-1 overflow-y-auto h-full max-h-32"
+            className="flex resize-none bg-transparent text-[#ddd] py-2 focus:outline-none min-w-0 flex-1 overflow-y-auto h-full max-h-32 whitespace-pre-wrap break-words"
             onChange={(e) => setInput(e.target.value)}
             value={input}
-            rows={Math.max(1, Math.ceil(input.length / 105))}
+            rows={Math.max(1, input.split("\n").length)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder="Message MyGPT"
           />
         </div>

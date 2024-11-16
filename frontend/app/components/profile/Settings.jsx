@@ -38,9 +38,9 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
       control: (
         <div className="relative">
           <Listbox value={theme} onChange={setTheme}>
-            <ListboxButton className="relative block w-full rounded-lg bg-[#2d2c2c] py-1.5 pr-8 pl-3 text-left text-sm text-white outline-none">
+            <ListboxButton className="relative block w-full py-1.5 pr-8 pl-3 text-left text-sm text-black dark:text-white outline-none">
               {theme === "light" ? "Light" : "Dark"}
-              <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-white" />
+              <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-black dark:text-white" />
             </ListboxButton>
 
             <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out">
@@ -78,9 +78,9 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
           >
-            <ListboxButton className="relative block w-full rounded-lg bg-[#2d2c2c] py-1.5 pr-8 pl-3 text-left text-sm text-white outline-none">
+            <ListboxButton className="relative block w-full py-1.5 pr-8 pl-3 text-left text-sm text-black dark:text-white outline-none">
               {language === "en" && "English"}
-              <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-white" />
+              <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-black dark:text-white" />
             </ListboxButton>
 
             <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out">
@@ -123,7 +123,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
     { label: "Last Login", value: new Date(user?.lastLogin).toLocaleString() },
     {
       control: (
-        <button className="relative block rounded-lg text-center text-sm px-4 py-2 outline-none bg-white/5 text-white">
+        <button className="relative block rounded-lg text-center text-sm px-4 py-2 outline-none bg-black dark:bg-white/5 text-white">
           Edit
         </button>
       ),
@@ -155,7 +155,9 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
                 className="flex justify-between items-center text-sm py-3 border-b border-[#666] last:border-none first:pt-0"
               >
                 <span>{setting.label}</span>
-                <span className="text-white p-1">{setting.value}</span>
+                <span className="text-black dark:text-white p-1">
+                  {setting.value}
+                </span>
                 {setting.control}
               </div>
             ))}
@@ -175,7 +177,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
   return (
     <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <DialogPanel className="relative bg-[#2d2c2c] text-gray-300 rounded-2xl shadow-lg w-full max-w-2xl min-h-96">
+        <DialogPanel className="relative bg-[#acacac] dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-xl min-h-96">
           <div className="flex justify-between items-center p-4 px-6 border-b border-[#666]">
             <DialogTitle className="text-lg font-medium leading-6">
               Settings
@@ -195,7 +197,9 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
                   <div
                     key={tab.id}
                     className={`flex items-center p-2 rounded-lg text-sm cursor-pointer ${
-                      activeTab === tab.id ? "bg-[#424242]" : "bg-transparent"
+                      activeTab === tab.id
+                        ? "bg-[#424242] text-[#d5d5d5]"
+                        : "bg-transparent"
                     }`}
                     onClick={() => setActiveTab(tab.id)}
                   >
