@@ -19,7 +19,7 @@
   opacity: 1;
 }
 
-code{
+code {
   @apply text-[.875em] bg-[#3d3d3d] font-[500] py-[.15rem] px-[.3rem] rounded-[.25rem];
 }
 
@@ -34,7 +34,7 @@ ol {
 p > strong,
 h2,
 p {
-  @apply py-1 text-[15px];
+  @apply py-2 text-[15px];
 }
 
 hr {
@@ -42,11 +42,11 @@ hr {
 }
 
 ul > li {
-  @apply px-2 py-1 text-[15px];
+  @apply px-2 py-2 text-[15px];
 }
 
 ol > li {
-  @apply my-2;
+  @apply my-3;
 }
 
 .loading-container {

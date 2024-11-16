@@ -97,10 +97,10 @@ export const formatResponse = (
           <TypewriterText
             key={lastIndex}
             text={mainPart.slice(lastIndex, match.index)}
-            className="leading-6"
+            className="leading-7"
           />
         ) : (
-          <span className="leading-6" key={lastIndex}>
+          <span className="leading-7" key={lastIndex}>
             <Markdown>{mainPart.slice(lastIndex, match.index)}</Markdown>
           </span>
         )
@@ -113,7 +113,7 @@ export const formatResponse = (
     parts.push(
       <div
         key={match.index}
-        className="relative text-sm bg-black text-white rounded-md mb-4"
+        className="relative text-sm bg-black text-[#b4b4b4] rounded-md mb-4"
       >
         {language && (
           <div className="flex justify-between items-center bg-[#393838] text-[#ccc] p-3 px-4 rounded-t-md">
@@ -142,10 +142,10 @@ export const formatResponse = (
         <TypewriterText
           key={lastIndex}
           text={mainPart.slice(lastIndex)}
-          className="leading-6 text-[15px]"
+          className="leading-7 text-[15px]"
         />
       ) : (
-        <span className="leading-6 text-[15px]" key={lastIndex}>
+        <span className="leading-7 text-[15px]" key={lastIndex}>
           <Markdown>{mainPart.slice(lastIndex)}</Markdown>
         </span>
       )
@@ -159,10 +159,10 @@ export const formatResponse = (
         (!conversation[index]?.aiShown && index === conversation.length - 1 ? (
           <TypewriterText
             text={explanation}
-            className="my-4 text-[15px] leading-6 rounded-lg"
+            className="my-4 text-[15px] leading-7 rounded-lg"
           />
         ) : (
-          <div className="my-4 text-[15px] leading-6 rounded-lg">
+          <div className="my-4 text-[15px] leading-7 rounded-lg">
             <Markdown>{explanation}</Markdown>
           </div>
         ))}

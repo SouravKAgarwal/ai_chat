@@ -10,6 +10,7 @@ import Heading from "../Heading";
 import Sidebar from "../Sidebar";
 import ChatDetailsPage from "./ChatDetailsPage";
 import Header from "../Header";
+import Navbar from "../Navbar";
 
 const ChatDetails = ({ chatId }) => {
   const router = useRouter();
@@ -85,7 +86,7 @@ const ChatDetails = ({ chatId }) => {
           sidebarOpen && "ml-0 sm:ml-48 md:ml-64"
         }`}
       >
-        <Header sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        <Navbar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <ChatDetailsPage
           chatId={chatId}
           user={user}

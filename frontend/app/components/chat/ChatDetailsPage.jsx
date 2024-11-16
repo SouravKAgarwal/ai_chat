@@ -131,7 +131,7 @@ const ChatDetailsPage = ({ chatId, setTitle }) => {
         <Loading />
       ) : (
         <div className="flex flex-col h-full overflow-auto">
-          <div className="flex-1 overflow-y-auto hide-scrollbar mt-16">
+          <div className="flex-1 overflow-y-auto hide-scrollbar">
             <ChatWindow
               conversation={conversation}
               loading={loading}

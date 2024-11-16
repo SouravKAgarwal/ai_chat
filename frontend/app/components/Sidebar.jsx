@@ -1,8 +1,6 @@
 import removeMarkdown from "markdown-to-text";
 import Link from "next/link";
-import { BiMenuAltRight } from "react-icons/bi";
 import { FaRainbow } from "react-icons/fa";
-import { HiMiniPencilSquare } from "react-icons/hi2";
 import { CgTrashEmpty } from "react-icons/cg";
 import SettingsModal from "./profile/Settings";
 import { useEffect, useState } from "react";
@@ -12,6 +10,8 @@ import { useLogoutQuery } from "@/redux/features/auth/authApi";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { categorizeChatsByDate } from "../utils";
+import { TbLayoutSidebarFilled } from "react-icons/tb";
+import { HiOutlinePencilAlt } from "react-icons/hi";
 
 const Sidebar = ({
   sidebarOpen,
@@ -81,22 +81,28 @@ const Sidebar = ({
 
   return (
     <div
-      className={`fixed h-full transition-all duration-300 ease-in-out text-[#bbb] px-4 py-2 z-50 flex flex-col ${
+      className={`fixed h-full transition-all duration-300 ease-in-out text-[#bbb] px-4 py-2 z-50 flex flex-col flex-shrink-0 ${
         sidebarOpen ? "w-full sm:w-48 md:w-64 bg-[#121212]" : ""
       }`}
     >
       {sidebarOpen && (
-        <div className="flex justify-between gap-4 items-center mb-4 py-2 px-2">
-          <button onClick={toggleSidebar} className="text-[#ccc]">
-            <BiMenuAltRight size={24} />
-          </button>
-          <Link
-            href="/"
-            className="text-[#ccc] hover:bg-[#222] rounded-lg p-2"
-            onClick={handleLinkClick}
-          >
-            <HiMiniPencilSquare size={20} />
-          </Link>
+        <div className="flex items-center justify-between">
+          <span className="flex">
+            <button
+              className="h-10 rounded-lg px-2 text-[#b4b4b4] focus-visible:outline-0 disabled:text-[#676767] focus-visible:bg-[#212121] enabled:hover:bg-[#212121]"
+              onClick={toggleSidebar}
+            >
+              <TbLayoutSidebarFilled className="w-6 h-6" />
+            </button>
+          </span>
+          <span className="flex">
+            <button
+              className="h-10 rounded-lg px-2 text-[#b4b4b4] focus-visible:outline-0 disabled:text-[#676767] focus-visible:bg-[#212121] enabled:hover:bg-[#212121]"
+              onClick={toggleSidebar}
+            >
+              <HiOutlinePencilAlt className="w-6 h-6" />
+            </button>
+          </span>
         </div>
       )}
 

@@ -55,7 +55,7 @@ const ChatInput = ({
 
   return (
     <div className="w-full flex justify-center max-h-96 overflow-hidden">
-      <div className="relative flex items-center rounded-[26px] p-2 bg-[#2f2f2f] w-full max-w-4xl overflow-hidden">
+      <div className="relative flex items-center rounded-[26px] p-2 bg-[#2f2f2f] w-full max-w-3xl overflow-hidden">
         <button className="absolute bottom-4 left-4 text-white font-bold">
           <label htmlFor="file-upload" className="cursor-pointer">
             <RiAttachmentLine size={20} />
@@ -87,7 +87,7 @@ const ChatInput = ({
           )}
 
           <textarea
-            className="flex resize-none bg-transparent text-[#ddd] py-2 focus:outline-none min-w-0 flex-1 overflow-y-auto h-full max-h-32 whitespace-pre-wrap break-words"
+            className="flex resize-none bg-transparent text-[#ddd] py-1.5 focus:outline-none min-w-0 flex-1 overflow-y-auto h-full max-h-32 whitespace-pre-wrap break-words"
             onChange={(e) => setInput(e.target.value)}
             value={input}
             rows={Math.max(1, input.split("\n").length)}

@@ -65,13 +65,13 @@ const ChatWindow = ({
     }
   };
 
-  const initialTabs = tabs.slice(0, 5);
-  const remainingTabs = tabs.slice(5);
+  const initialTabs = tabs.slice(0, 4);
+  const remainingTabs = tabs.slice(4);
 
   return (
     <div
       ref={chatWindowRef}
-      className="w-full max-w-4xl mx-auto px-4 md:px-14 pt-6 flex-1 overflow-y-auto flex flex-col hide-scrollbar"
+      className="w-full max-w-3xl mx-auto px-3 md:px-14 pt-6 flex-1 overflow-y-auto flex flex-col hide-scrollbar"
       style={{ height: "100%" }}
     >
       {conversation.length > 0 ? (
@@ -79,11 +79,13 @@ const ChatWindow = ({
           <div
             key={index}
             className={`flex ${
-              msg.sender === "human" ? "self-end" : "items-start py-3"
+              msg.sender === "human"
+                ? "self-end"
+                : "items-start ml-0 md:-ml-14 py-3"
             }`}
           >
             {msg.sender === "ai" && (
-              <div className="mr-3 rounded-full hidden md:block p-2 mt-1 bg-transparent border border-[#ddd] dark:border-[#bbb]">
+              <div className="mr-2 rounded-full hidden md:block p-2 mt-2 bg-transparent border border-[#ddd] dark:border-[#bbb]">
                 <FaRainbow
                   size={14}
                   className="text-3xl text-[#666] dark:text-[#ccc]"
@@ -105,11 +107,11 @@ const ChatWindow = ({
         ))
       ) : (
         <div
-          className="w-full flex flex-col items-center justify-center h-full"
+          className="w-full flex flex-col items-center justify-center h-[80%]"
           style={{ display: location.pathname !== "/" && "none" }}
         >
-          <div className="text-2xl font-bold py-5">Start the conversation!</div>
-          <div className="flex justify-center w-full max-w-4xl mb-2">
+          <div className="text-3xl font-bold">Start the conversation!</div>
+          <div className="flex justify-center w-full py-4">
             <ChatInput
               setFile={setFile}
               input={input}
@@ -127,7 +129,7 @@ const ChatWindow = ({
             {initialTabs.map((tab, idx) => (
               <button
                 key={idx}
-                className="flex items-center space-x-2 px-3 py-2 rounded-full border border-gray-600"
+                className="flex items-center space-x-2 px-3 py-2 rounded-full border border-[hsla(0,0%,100%,.15)]"
                 onClick={() => {
                   const randomPrompt =
                     tab.prompts[Math.floor(Math.random() * tab.prompts.length)];
@@ -140,7 +142,7 @@ const ChatWindow = ({
             ))}
             {!showMoreTabs && (
               <button
-                className="flex items-center space-x-2 px-3 py-2 rounded-full border border-gray-600"
+                className="flex items-center space-x-2 px-3 py-2 rounded-full border border-[hsla(0,0%,100%,.15)]"
                 onClick={() => setShowMoreTabs(true)}
               >
                 <span className="text-sm font-medium">More</span>
@@ -150,7 +152,7 @@ const ChatWindow = ({
               remainingTabs.map((tab, idx) => (
                 <button
                   key={idx}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-full border border-gray-600"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-full border border-[hsla(0,0%,100%,.15)]"
                   onClick={() => {
                     const randomPrompt =
                       tab.prompts[

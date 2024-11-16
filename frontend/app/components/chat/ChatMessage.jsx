@@ -48,7 +48,7 @@ const ChatMessage = ({
       <div
         className={`${
           msg.sender === "human"
-            ? "self-end text-white bg-gray-400 dark:bg-[#2f2f2f] text-sm rounded-t-2xl rounded-bl-2xl p-3 px-5"
+            ? "items-end max-w-xl text-white bg-zinc-700 dark:bg-[#2f2f2f] text-sm rounded-t-2xl rounded-bl-2xl p-3"
             : "self-start text-sm rounded-t-2xl rounded-br-2xl p-2"
         }`}
       >

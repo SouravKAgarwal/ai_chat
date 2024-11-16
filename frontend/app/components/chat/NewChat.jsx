@@ -10,6 +10,7 @@ import ChatWindow from "./ChatWindow";
 import ChatInput from "./ChatInput";
 import Header from "../Header";
 import Sidebar from "../Sidebar";
+import Navbar from "../Navbar";
 
 const NewChat = ({ user }) => {
   const router = useRouter();
@@ -171,9 +172,9 @@ const NewChat = ({ user }) => {
           sidebarOpen && "ml-0 sm:ml-48 md:ml-64"
         }`}
       >
-        <Header sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        <Navbar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <div className="flex flex-col h-full overflow-auto">
-          <div className="flex-1 overflow-y-auto mt-16">
+          <div className="flex-1 overflow-y-auto mt-14">
             <ChatWindow
               setFile={setFile}
               conversation={conversation}
