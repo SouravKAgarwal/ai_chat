@@ -9,7 +9,6 @@ import {
 import Heading from "../Heading";
 import Sidebar from "../Sidebar";
 import ChatDetailsPage from "./ChatDetailsPage";
-import Header from "../Header";
 import Navbar from "../Navbar";
 
 const ChatDetails = ({ chatId }) => {

@@ -8,7 +8,6 @@ import {
 import { useRouter } from "next/navigation";
 import ChatWindow from "./ChatWindow";
 import ChatInput from "./ChatInput";
-import Header from "../Header";
 import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
 
