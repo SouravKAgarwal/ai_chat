@@ -173,8 +173,9 @@ const NewChat = ({ user }) => {
       >
         <Navbar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <div className="flex flex-col h-full overflow-auto">
-          <div className="flex-1 overflow-y-auto mt-14">
+          <div className="flex-1 overflow-y-auto">
             <ChatWindow
+              className="overflow-y-auto"
               setFile={setFile}
               conversation={conversation}
               loading={loading}

@@ -133,6 +133,7 @@ const ChatDetailsPage = ({ chatId, setTitle }) => {
         <div className="flex flex-col h-full overflow-auto">
           <div className="flex-1 overflow-y-auto hide-scrollbar">
             <ChatWindow
+              className="overflow-y-auto"
               conversation={conversation}
               loading={loading}
               setPreviewImage={setPreviewImage}

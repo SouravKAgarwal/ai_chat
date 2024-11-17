@@ -6,6 +6,7 @@ import { GoArrowDown } from "react-icons/go";
 import { tabs } from "../../utils";
 
 const ChatWindow = ({
+  className,
   setFile,
   conversation,
   loading,
@@ -71,7 +72,7 @@ const ChatWindow = ({
   return (
     <div
       ref={chatWindowRef}
-      className="w-full max-w-3xl mx-auto px-3 md:px-14 pt-6 flex-1 overflow-y-auto flex flex-col hide-scrollbar"
+      className={`w-full max-w-3xl mx-auto px-3 md:pl-14 pt-6 flex-1 ${className} flex flex-col hide-scrollbar`}
       style={{ height: "100%" }}
     >
       {conversation.length > 0 ? (

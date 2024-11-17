@@ -18,7 +18,6 @@ const CodeSandbox = ({ code, theme = "dark" }) => {
           style={{
             height: "auto",
             maxWidth: "85vw",
-            fontFamily: "Ubuntu",
             fontSize: "14px",
           }}
         />

@@ -38,6 +38,15 @@ const userSchema = new mongoose.Schema(
       limitReached: { type: Boolean, default: false },
     },
 
+    sharedLinks: [
+      {
+        url: { type: String },
+        chatId: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
+        title: { type: String },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+
     lastLogin: { type: Date },
 
     resetPasswordToken: { type: String },

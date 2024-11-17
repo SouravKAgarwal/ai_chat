@@ -33,43 +33,43 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
   ];
 
   const generalSettings = [
-    // {
-    //   label: "Theme",
-    //   control: (
-    //     <div className="relative">
-    //       <Listbox value={theme} onChange={setTheme}>
-    //         <ListboxButton className="relative block w-full py-1.5 pr-8 pl-3 text-left text-sm text-black dark:text-white outline-none">
-    //           {theme === "light" ? "Light" : "Dark"}
-    //           <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-black dark:text-white" />
-    //         </ListboxButton>
+    {
+      label: "Theme",
+      control: (
+        <div className="relative">
+          <Listbox value={theme} onChange={setTheme}>
+            <ListboxButton className="relative block w-full py-1.5 pr-8 pl-3 text-left text-sm text-black dark:text-white outline-none">
+              {theme === "light" ? "Light" : "Dark"}
+              <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-black dark:text-white" />
+            </ListboxButton>
 
-    //         <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out">
-    //           <ListboxOption
-    //             value="light"
-    //             className={({ active, selected }) =>
-    //               `flex w-20 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
-    //                 active ? "bg-[#333] text-white" : "text-white"
-    //               }`
-    //             }
-    //           >
-    //             {({ selected }) => <span>Light</span>}
-    //           </ListboxOption>
+            <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out">
+              <ListboxOption
+                value="light"
+                className={({ active, selected }) =>
+                  `flex w-20 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
+                    active ? "bg-[#333] text-white" : "text-white"
+                  }`
+                }
+              >
+                {({ selected }) => <span>Light</span>}
+              </ListboxOption>
 
-    //           <ListboxOption
-    //             value="dark"
-    //             className={({ active, selected }) =>
-    //               `flex w-20 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
-    //                 active ? "bg-[#333] text-white" : "text-white"
-    //               }`
-    //             }
-    //           >
-    //             {({ selected }) => <span>Dark</span>}
-    //           </ListboxOption>
-    //         </ListboxOptions>
-    //       </Listbox>
-    //     </div>
-    //   ),
-    // },
+              <ListboxOption
+                value="dark"
+                className={({ active, selected }) =>
+                  `flex w-20 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
+                    active ? "bg-[#333] text-white" : "text-white"
+                  }`
+                }
+              >
+                {({ selected }) => <span>Dark</span>}
+              </ListboxOption>
+            </ListboxOptions>
+          </Listbox>
+        </div>
+      ),
+    },
     {
       label: "Language",
       control: (

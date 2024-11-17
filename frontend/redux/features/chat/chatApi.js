@@ -48,6 +48,28 @@ export const chatApi = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    shareChat: builder.mutation({
+      query: ({ chatId, userId }) => ({
+        url: "chat/share",
+        method: "POST",
+        body: {
+          chatId,
+          userId,
+        },
+        credentials: "include",
+      }),
+    }),
+    renameChat: builder.mutation({
+      query: ({ chatId, newTitle }) => ({
+        url: "chat/update/title",
+        method: "PUT",
+        body: {
+          chatId,
+          newTitle,
+        },
+        credentials: "include",
+      }),
+    }),
     getChatsByUserId: builder.query({
       query: ({ userId }) => ({
         url: `chat/user/${userId}`,
@@ -78,5 +100,7 @@ export const {
   useRefreshChatMutation,
   useGetChatsByUserIdQuery,
   useGetChatsByIdQuery,
+  useShareChatMutation,
+  useRenameChatMutation,
   useDeleteChatMutation,
 } = chatApi;

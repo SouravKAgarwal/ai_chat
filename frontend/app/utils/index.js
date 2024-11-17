@@ -54,7 +54,7 @@ const TypewriterText = ({ text, className }) => {
       if (currentIndex >= text.length) {
         clearInterval(intervalId);
       }
-    }, 20);
+    }, 10);
 
     return () => clearInterval(intervalId);
   }, [text]);
@@ -113,7 +113,7 @@ export const formatResponse = (
     parts.push(
       <div
         key={match.index}
-        className="relative text-sm bg-black text-[#b4b4b4] rounded-md mb-4"
+        className="relative text-sm bg-black text-[#b4b4b4] rounded-md mb-4 w-full md:w-[95%]"
       >
         {language && (
           <div className="flex justify-between items-center bg-[#393838] text-[#ccc] p-3 px-4 rounded-t-md">

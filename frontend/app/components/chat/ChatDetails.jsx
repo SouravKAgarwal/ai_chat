@@ -10,6 +10,7 @@ import Heading from "../Heading";
 import Sidebar from "../Sidebar";
 import ChatDetailsPage from "./ChatDetailsPage";
 import Navbar from "../Navbar";
+import removeMarkdown from "markdown-to-text";
 
 const ChatDetails = ({ chatId }) => {
   const router = useRouter();
@@ -72,7 +73,7 @@ const ChatDetails = ({ chatId }) => {
 
   return (
     <div className="flex h-[100dvh] md:h-screen overflow-hidden">
-      <Heading title={title} />
+      <Heading title={removeMarkdown(title).trimEnd()} />
       <Sidebar
         sidebarOpen={sidebarOpen}
         toggleSidebar={toggleSidebar}
@@ -85,7 +86,11 @@ const ChatDetails = ({ chatId }) => {
           sidebarOpen && "ml-0 sm:ml-48 md:ml-64"
         }`}
       >
-        <Navbar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        <Navbar
+          sidebarOpen={sidebarOpen}
+          toggleSidebar={toggleSidebar}
+          chatId={chatId}
+        />
         <ChatDetailsPage
           chatId={chatId}
           user={user}

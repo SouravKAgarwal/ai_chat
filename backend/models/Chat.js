@@ -59,6 +59,7 @@ const chatSchema = new mongoose.Schema(
     },
     title: { type: String, required: true },
     conversation: [messageSchema],
+    proxyChatId: { type: String, unique: true, sparse: true },
   },
   { timestamps: true }
 );

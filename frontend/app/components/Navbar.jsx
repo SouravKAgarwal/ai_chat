@@ -1,6 +1,6 @@
 import { TbLayoutSidebarFilled } from "react-icons/tb";
 import { HiOutlinePencilAlt } from "react-icons/hi";
-import { ChevronDownIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useLogoutQuery } from "@/redux/features/auth/authApi";
@@ -10,18 +10,38 @@ import Login from "./auth/Login";
 import Register from "./auth/Register";
 import SettingsModal from "./profile/Settings";
 import Link from "next/link";
+import { FiShare } from "react-icons/fi";
+import { useShareChatMutation } from "@/redux/features/chat/chatApi";
+import ShareDialog from "./chat/ShareDialog";
 
-const Navbar = ({ sidebarOpen, toggleSidebar }) => {
+const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
   const [userLogout, setUserLogout] = useState(false);
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [linkCreated, setLinkCreated] = useState(false);
+  const [shareLink, setShareLink] = useState(
+    "https://chatai-01.vercel.app/share/..."
+  );
 
   const { user } = useSelector((state) => state.auth);
 
+  const [shareChat] = useShareChatMutation();
   const { isSuccess } = useLogoutQuery(undefined, {
     skip: !userLogout,
   });
+
+  const handleCreateLink = async () => {
+    try {
+      const { data } = await shareChat({ userId: user?._id, chatId });
+      setShareLink(data?.sharedLink);
+      setLinkCreated(true);
+    } catch (err) {
+      console.log(err);
+      toast.error(err.message);
+    }
+  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -32,14 +52,14 @@ const Navbar = ({ sidebarOpen, toggleSidebar }) => {
 
   return (
     <>
-      <div className="sticky top-0 p-3 mb-1.5 flex items-center justify-between z-10 h-14 font-semibold bg-[#212121]">
+      <div className="sticky top-0 p-3 mb-1.5 flex items-center justify-between z-10 h-14 font-semibold">
         <div className="absolute start-1/2 ltr:translate-x-1/2 rtl:translate-x-1/2"></div>
         <div className="flex items-center gap-0 overflow-hidden">
           {!sidebarOpen && (
             <div className="flex items-center">
               <span className="flex">
                 <button
-                  className="h-10 rounded-lg px-2 text-[#b4b4b4] focus-visible:outline-0 disabled:text-[#676767] focus-visible:bg-[#212121] enabled:hover:bg-[#212121]"
+                  className="rounded-lg p-2 focus-visible:outline-0 hover:bg-[#2f2f2f] disabled:text-[#676767]"
                   onClick={toggleSidebar}
                 >
                   <TbLayoutSidebarFilled className="w-6 h-6" />
@@ -48,7 +68,7 @@ const Navbar = ({ sidebarOpen, toggleSidebar }) => {
               <span className="flex">
                 <Link
                   href="/"
-                  className="rounded-lg px-2 text-[#b4b4b4] focus-visible:outline-0 disabled:text-[#676767] focus-visible:bg-[#212121] enabled:hover:bg-[#212121]"
+                  className="rounded-lg p-2 focus-visible:outline-0 hover:bg-[#2f2f2f] disabled:text-[#676767]"
                   onClick={toggleSidebar}
                 >
                   <HiOutlinePencilAlt className="w-6 h-6" />
@@ -56,16 +76,19 @@ const Navbar = ({ sidebarOpen, toggleSidebar }) => {
               </span>
             </div>
           )}
-          <button className="group flex cursor-pointer items-center gap-1 rounded-lg py-1.5 px-3 text-lg hover:bg-[#2f2f2f] font-semibold text-[#b4b4b4] overflow-hidden whitespace-nowrap">
-            <div className="text-[#b4b4b4] font-semibold">ChatGPT</div>
+          <button className="group flex cursor-pointer items-center gap-1 rounded-lg py-1.5 px-3 text-lg dark:hover:bg-[#2f2f2f] font-semibold overflow-hidden whitespace-nowrap">
+            <div className="font-semibold">MyGPT</div>
             <ChevronDownIcon className="w-4 h-4" />
           </button>
         </div>
         <div className="gap-2 flex items-center pr-1 leading-[0]">
           {location.pathname !== "/" && (
             <button className="hidden md:block relative text-[#ececec] bg-[#212121] border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2">
-              <div className="flex w-full items-center justify-center gap-1.5">
-                <ShareIcon className="w-4 h-4" />
+              <div
+                className="flex w-full items-center justify-center gap-1.5"
+                onClick={() => setShareOpen(true)}
+              >
+                <FiShare className="w-4 h-4" />
                 Share
               </div>
             </button>
@@ -85,7 +108,7 @@ const Navbar = ({ sidebarOpen, toggleSidebar }) => {
           </button>
         </div>
       </div>
-      {(login || register || isOpen) && (
+      {(login || register || isOpen || shareOpen) && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-70" />
       )}
 
@@ -100,6 +123,14 @@ const Navbar = ({ sidebarOpen, toggleSidebar }) => {
         setIsOpen={setIsOpen}
         user={user}
         setUserLogout={setUserLogout}
+      />
+      <ShareDialog
+        shareOpen={shareOpen}
+        setShareOpen={setShareOpen}
+        handleCreateLink={handleCreateLink}
+        shareLink={shareLink}
+        linkCreated={linkCreated}
+        setLinkCreated={setLinkCreated}
       />
     </>
   );

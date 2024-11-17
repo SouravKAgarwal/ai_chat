@@ -1,7 +1,7 @@
 import removeMarkdown from "markdown-to-text";
 import Link from "next/link";
 import { FaRainbow } from "react-icons/fa";
-import { CgTrashEmpty } from "react-icons/cg";
+import { PiDotsThreeBold } from "react-icons/pi";
 import SettingsModal from "./profile/Settings";
 import { useEffect, useState } from "react";
 import Login from "./auth/Login";
@@ -12,6 +12,15 @@ import { toast } from "sonner";
 import { categorizeChatsByDate } from "../utils";
 import { TbLayoutSidebarFilled } from "react-icons/tb";
 import { HiOutlinePencilAlt } from "react-icons/hi";
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
+import { FiShare, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { useShareChatMutation } from "@/redux/features/chat/chatApi";
+import ShareDialog from "./chat/ShareDialog";
 
 const Sidebar = ({
   sidebarOpen,
@@ -24,10 +33,29 @@ const Sidebar = ({
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
   const [userLogout, setUserLogout] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [linkCreated, setLinkCreated] = useState(false);
+  const [shareLink, setShareLink] = useState(
+    "https://chatai-01.vercel.app/share/..."
+  );
+
+  const [chatId, setChatId] = useState("");
 
   const categorizedChats = categorizeChatsByDate(conversation);
   const { user } = useSelector((state) => state.auth);
   const { isSuccess } = useLogoutQuery(undefined, { skip: !userLogout });
+  const [shareChat] = useShareChatMutation();
+
+  const handleCreateLink = async () => {
+    try {
+      const { data } = await shareChat({ userId: user?._id, chatId });
+      setShareLink(data?.sharedLink);
+      setLinkCreated(true);
+    } catch (err) {
+      console.log(err);
+      toast.error(err.message);
+    }
+  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -62,16 +90,53 @@ const Sidebar = ({
             >
               {removeMarkdown(chat.title).trimEnd()}
             </Link>
-            <div className="pl-2">
-              <CgTrashEmpty
+            <div className="relative pl-2">
+              <PiDotsThreeBold
                 size={20}
                 className={`cursor-pointer ${
                   location.pathname === `/chat/${chat._id}`
                     ? "visible"
                     : "invisible group-hover:visible"
                 }`}
-                onClick={() => handleDelete(chat._id)}
               />
+              <Listbox>
+                {({ open }) => (
+                  <div>
+                    <ListboxButton className="absolute inset-0" />
+                    {open && (
+                      <ListboxOptions className="absolute right-0 mt-2 w-40 bg-[#333] text-white shadow-lg rounded-lg overflow-hidden z-10">
+                        <ListboxOption
+                          className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#444] text-sm"
+                          value="share"
+                          onClick={() => {
+                            setShareOpen(true);
+                            setChatId(chat._id);
+                          }}
+                        >
+                          <FiShare className="mr-2" />
+                          Share
+                        </ListboxOption>
+                        <ListboxOption
+                          className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#444] text-sm"
+                          value="rename"
+                          onClick={() => console.log("Rename clicked")}
+                        >
+                          <FiEdit2 className="mr-2" />
+                          Rename
+                        </ListboxOption>
+                        <ListboxOption
+                          className="flex items-center px-3 py-2 cursor-pointer text-red-500 hover:bg-[#444] text-sm"
+                          value="delete"
+                          onClick={() => handleDelete(chat._id)}
+                        >
+                          <FiTrash2 className="mr-2" />
+                          Delete
+                        </ListboxOption>
+                      </ListboxOptions>
+                    )}
+                  </div>
+                )}
+              </Listbox>
             </div>
           </li>
         ))}
@@ -110,7 +175,7 @@ const Sidebar = ({
         {sidebarOpen && (
           <div>
             <ul className="gap-3 list-none -ml-4">
-              <li className="py-2">
+              <li className="py-3">
                 <Link
                   href="/"
                   onClick={handleLinkClick}
@@ -121,7 +186,7 @@ const Sidebar = ({
                 </Link>
               </li>
 
-              <div className="mt-5">
+              <div className="mt-3">
                 {isLoading ? (
                   <div className="loading-dots px-2">
                     <div className="dot"></div>
@@ -185,14 +250,7 @@ const Sidebar = ({
         </div>
       )}
 
-      {isOpen && <div className="fixed inset-0 z-40 bg-black bg-opacity-70" />}
-      <SettingsModal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        user={user}
-        setUserLogout={setUserLogout}
-      />
-      {(login || register || isOpen) && (
+      {(login || register || isOpen || shareOpen) && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-70" />
       )}
       <Login login={login} setLogin={setLogin} setRegister={setRegister} />
@@ -200,6 +258,20 @@ const Sidebar = ({
         registered={register}
         setLogin={setLogin}
         setRegister={setRegister}
+      />
+      <SettingsModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        user={user}
+        setUserLogout={setUserLogout}
+      />
+      <ShareDialog
+        shareOpen={shareOpen}
+        setShareOpen={setShareOpen}
+        handleCreateLink={handleCreateLink}
+        shareLink={shareLink}
+        linkCreated={linkCreated}
+        setLinkCreated={setLinkCreated}
       />
     </div>
   );
