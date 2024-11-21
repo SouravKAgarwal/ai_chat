@@ -1,8 +1,9 @@
 const Heading = ({ title }) => {
   return (
     <>
-      <title>{title}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>{title}</title>
+      <meta property="title" content={title} />
       <meta
         name="description"
         content="MyGPT helps you get answers, find inspiration and be more productive. It is free to use and easy to try. Just ask and MyGPT can help with writing, learning, brainstorming and more."

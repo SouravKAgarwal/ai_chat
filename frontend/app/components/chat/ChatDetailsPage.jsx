@@ -64,8 +64,8 @@ const ChatDetailsPage = ({ chatId, setTitle }) => {
         return updatedConversation;
       });
     } catch (error) {
-      console.error("Failed to save chat or generate response:", error);
-      toast.error("Failed to save chat or generate response.");
+      console.error(error);
+      toast.error(error.message);
     } finally {
       setInput("");
       setImage("");

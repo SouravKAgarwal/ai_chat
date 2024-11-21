@@ -5,16 +5,12 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import {
-  FaFacebookF,
-  FaLinkedinIn,
-  FaReddit,
-  FaWhatsapp,
-} from "react-icons/fa";
+import { FaFacebookF, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
 import { BsTwitterX } from "react-icons/bs";
 import { GoCopy } from "react-icons/go";
 import { Fragment, useState } from "react";
 import { LinkIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 const ShareDialog = ({
   shareOpen,
@@ -111,24 +107,30 @@ const ShareDialog = ({
                             Icon: FaLinkedinIn,
                             name: "LinkedIn",
                             back: "hover:bg-[#0077B5]",
+                            href: "",
                           },
                           {
                             Icon: FaFacebookF,
                             name: "Facebook",
                             back: "hover:bg-[#316FF6]",
+                            href: "",
                           },
                           {
                             Icon: FaWhatsapp,
                             name: "Whatsapp",
                             back: "hover:bg-[#25D366]",
+                            href: `https://api.whatsapp.com/send?text=${shareLink}`,
                           },
                           {
                             Icon: BsTwitterX,
                             name: "X",
                             back: "hover:bg-[#000000]",
+                            href: `https://twitter.com/intent/tweet?url=${shareLink}&title=${""}`,
                           },
-                        ].map(({ Icon, name, back }, idx) => (
-                          <div
+                        ].map(({ Icon, name, back, href }, idx) => (
+                          <Link
+                            href={href}
+                            target="__blank"
                             key={idx}
                             className="flex flex-col items-center gap-2"
                           >
@@ -140,7 +142,7 @@ const ShareDialog = ({
                             <span className="text-sm text-[#b4b4b4]">
                               {name}
                             </span>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     </>

@@ -93,7 +93,7 @@ const ChatWindow = ({
                 />
               </div>
             )}
-            <div className="w-full truncate">
+            <div className="w-full">
               <ChatMessage
                 msg={msg}
                 index={index}

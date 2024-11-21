@@ -42,29 +42,29 @@ export const handleTextToSpeech = (
   }
 };
 
-const TypewriterText = ({ text, className }) => {
-  const [displayedText, setDisplayedText] = useState("");
+// const TypewriterText = ({ text, className }) => {
+//   const [displayedText, setDisplayedText] = useState("");
 
-  useEffect(() => {
-    let currentIndex = 0;
-    const intervalId = setInterval(() => {
-      setDisplayedText(text.substring(0, currentIndex + 1));
-      currentIndex += 1;
+//   useEffect(() => {
+//     let currentIndex = 0;
+//     const intervalId = setInterval(() => {
+//       setDisplayedText(text.substring(0, currentIndex + 1));
+//       currentIndex += 1;
 
-      if (currentIndex >= text.length) {
-        clearInterval(intervalId);
-      }
-    }, 10);
+//       if (currentIndex >= text.length) {
+//         clearInterval(intervalId);
+//       }
+//     }, 10);
 
-    return () => clearInterval(intervalId);
-  }, [text]);
+//     return () => clearInterval(intervalId);
+//   }, [text]);
 
-  return (
-    <span className={className}>
-      <Markdown>{displayedText}</Markdown>
-    </span>
-  );
-};
+//   return (
+//     <span className={className}>
+//       <Markdown>{displayedText}</Markdown>
+//     </span>
+//   );
+// };
 
 export const formatResponse = (
   text,
@@ -84,7 +84,7 @@ export const formatResponse = (
     ? text.replace(explanationMatch[0], "").trim()
     : text;
 
-  const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
+  const codeBlockRegex = /```([a-zA-Z0-9_+\-]*)\n([\s\S]*?)```/g;
 
   const parts = [];
   let lastIndex = 0;
@@ -93,17 +93,9 @@ export const formatResponse = (
   while ((match = codeBlockRegex.exec(mainPart)) !== null) {
     if (match.index > lastIndex) {
       parts.push(
-        !conversation[index].aiShown && index === conversation.length - 1 ? (
-          <TypewriterText
-            key={lastIndex}
-            text={mainPart.slice(lastIndex, match.index)}
-            className="leading-7"
-          />
-        ) : (
-          <span className="leading-7" key={lastIndex}>
-            <Markdown>{mainPart.slice(lastIndex, match.index)}</Markdown>
-          </span>
-        )
+        <span className="leading-7" key={lastIndex}>
+          <Markdown>{mainPart.slice(lastIndex, match.index)}</Markdown>
+        </span>
       );
     }
 
@@ -138,34 +130,20 @@ export const formatResponse = (
 
   if (lastIndex < mainPart.length) {
     parts.push(
-      !conversation[index]?.aiShown && index === conversation.length - 1 ? (
-        <TypewriterText
-          key={lastIndex}
-          text={mainPart.slice(lastIndex)}
-          className="leading-7 text-[15px]"
-        />
-      ) : (
-        <span className="leading-7 text-[15px]" key={lastIndex}>
-          <Markdown>{mainPart.slice(lastIndex)}</Markdown>
-        </span>
-      )
+      <span className="leading-7 text-[15px]" key={lastIndex}>
+        <Markdown>{mainPart.slice(lastIndex)}</Markdown>
+      </span>
     );
   }
 
   return (
     <>
       {parts}
-      {explanation &&
-        (!conversation[index]?.aiShown && index === conversation.length - 1 ? (
-          <TypewriterText
-            text={explanation}
-            className="my-4 text-[15px] leading-7 rounded-lg"
-          />
-        ) : (
-          <div className="my-4 text-[15px] leading-7 rounded-lg">
-            <Markdown>{explanation}</Markdown>
-          </div>
-        ))}
+      {explanation && (
+        <div className="my-4 text-[15px] leading-7 rounded-lg">
+          <Markdown>{explanation}</Markdown>
+        </div>
+      )}
       <div className="flex text-lg text-[#b4b4b4]">
         {conversation[index]?.refreshedResponses?.length > 0 && (
           <div className="flex items-center">

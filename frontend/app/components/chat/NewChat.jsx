@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   useCreateChatMutation,
@@ -26,7 +26,6 @@ const NewChat = ({ user }) => {
   const [conversation, setConversation] = useState([]);
   const [loading, setLoading] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState("");
-  const [redirect, setRedirect] = useState(false);
 
   const {
     data: chatData,
@@ -60,8 +59,6 @@ const NewChat = ({ user }) => {
     }
   }, [chatData, deleteSuccess]);
 
-  const aiMessageRef = useRef(false);
-
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
@@ -69,7 +66,7 @@ const NewChat = ({ user }) => {
     setConversation((prevConversation) => [...prevConversation, newMessage]);
     setConversation((prevConversation) => [
       ...prevConversation,
-      { sender: "ai", message: "", aiShown: false },
+      { sender: "ai", message: "" },
     ]);
 
     const chatData = {
@@ -93,25 +90,10 @@ const NewChat = ({ user }) => {
         return updatedConversation;
       });
 
-      const messageLength = aiMessage.length;
-      const delay = messageLength * 40;
-
-      setTimeout(() => {
-        setConversation((prevConversation) => {
-          const updatedConversation = [...prevConversation];
-          const lastAiMessageIndex = updatedConversation.length - 1;
-          updatedConversation[lastAiMessageIndex].aiShown = true;
-          return updatedConversation;
-        });
-
-        aiMessageRef.current = true;
-        setRedirect(true);
-      }, delay);
-
       setRedirectUrl(`/chat/${createdChat?.chat?._id}`);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to save chat or generate response");
+      toast.error(error.message);
     } finally {
       setInput("");
       setImage(null);
@@ -136,11 +118,10 @@ const NewChat = ({ user }) => {
   }, [isSuccess, refetch]);
 
   useEffect(() => {
-    if (aiMessageRef.current && redirect && redirectUrl) {
+    if (redirectUrl) {
       router.push(redirectUrl);
-      setRedirect(false);
     }
-  }, [redirect, redirectUrl]);
+  }, [redirectUrl]);
 
   useEffect(() => {
     const handleResize = () => {
