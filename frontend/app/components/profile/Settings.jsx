@@ -44,7 +44,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
             </ListboxButton>
 
             <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out">
-              <ListboxOption
+              {/* <ListboxOption
                 value="light"
                 className={({ active, selected }) =>
                   `flex w-20 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
@@ -53,7 +53,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
                 }
               >
                 {({ selected }) => <span>Light</span>}
-              </ListboxOption>
+              </ListboxOption> */}
 
               <ListboxOption
                 value="dark"

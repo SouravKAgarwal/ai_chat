@@ -47,7 +47,7 @@ li > p > strong {
   @apply text-[15px] font-bold py-2 whitespace-pre-wrap break-words;
 }
 
-p:has(> em) {
+p:has(> em:empty) {
   display: none;
 }
 

@@ -4,11 +4,11 @@ import {
   SandpackCodeEditor,
 } from "@codesandbox/sandpack-react";
 
-const CodeSandbox = ({ code, theme = "dark" }) => {
+const CodeSandbox = ({ code }) => {
   return (
     <SandpackProvider
       template="react"
-      theme={theme}
+      theme="dark"
       files={{
         "/App.js": { code, readOnly: true },
       }}

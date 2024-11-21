@@ -86,14 +86,14 @@ const ChatWindow = ({
             }`}
           >
             {msg.sender === "ai" && (
-              <div className="mr-2 rounded-full hidden md:block p-2 mt-2 bg-transparent border border-[#ddd] dark:border-[#bbb]">
+              <div className="mr-2 rounded-full hidden md:block p-2 mt-4 bg-transparent border border-[#ddd] dark:border-[#bbb]">
                 <FaRainbow
                   size={14}
                   className="text-3xl text-[#666] dark:text-[#ccc]"
                 />
               </div>
             )}
-            <div className="w-full">
+            <div className="w-full truncate">
               <ChatMessage
                 msg={msg}
                 index={index}

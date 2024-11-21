@@ -26,7 +26,6 @@ const Sidebar = ({
   sidebarOpen,
   toggleSidebar,
   conversation,
-  isLoading,
   handleDelete,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,7 +43,7 @@ const Sidebar = ({
   const categorizedChats = categorizeChatsByDate(conversation);
   const { user } = useSelector((state) => state.auth);
   const { isSuccess } = useLogoutQuery(undefined, { skip: !userLogout });
-  const [shareChat] = useShareChatMutation();
+  const [shareChat, { isLoading }] = useShareChatMutation();
 
   const handleCreateLink = async () => {
     try {
@@ -106,7 +105,7 @@ const Sidebar = ({
                     {open && (
                       <ListboxOptions className="absolute right-0 mt-2 w-40 bg-[#333] text-white shadow-lg rounded-lg overflow-hidden z-10">
                         <ListboxOption
-                          className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#444] text-sm"
+                          className="flex items-center px-3 py-2 cursor-pointer border-b border-[hsla(0,0%,100%,.15)] hover:bg-[#444] text-sm"
                           value="share"
                           onClick={() => {
                             setShareOpen(true);
@@ -117,7 +116,7 @@ const Sidebar = ({
                           Share
                         </ListboxOption>
                         <ListboxOption
-                          className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#444] text-sm"
+                          className="flex items-center px-3 py-2 cursor-pointer border-b border-[hsla(0,0%,100%,.15)] hover:bg-[#444] text-sm"
                           value="rename"
                           onClick={() => console.log("Rename clicked")}
                         >
@@ -152,21 +151,21 @@ const Sidebar = ({
     >
       {sidebarOpen && (
         <div className="flex items-center justify-between">
-          <span className="flex">
+          <span className="flex h-10">
             <button
-              className="h-10 rounded-lg px-2 text-[#b4b4b4] focus-visible:outline-0 disabled:text-[#676767] focus-visible:bg-[#212121] enabled:hover:bg-[#212121]"
+              className="rounded-lg p-1.5 focus-visible:outline-0 hover:bg-[#222222] disabled:text-[#676767]"
               onClick={toggleSidebar}
             >
               <TbLayoutSidebarFilled className="w-6 h-6" />
             </button>
           </span>
           <span className="flex">
-            <button
-              className="h-10 rounded-lg px-2 text-[#b4b4b4] focus-visible:outline-0 disabled:text-[#676767] focus-visible:bg-[#212121] enabled:hover:bg-[#212121]"
-              onClick={toggleSidebar}
+            <Link
+              href="/"
+              className="rounded-lg p-1.5 focus-visible:outline-0 hover:bg-[#222222] disabled:text-[#676767]"
             >
               <HiOutlinePencilAlt className="w-6 h-6" />
-            </button>
+            </Link>
           </span>
         </div>
       )}
@@ -187,32 +186,16 @@ const Sidebar = ({
               </li>
 
               <div className="mt-3">
-                {isLoading ? (
-                  <div className="loading-dots px-2">
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                  </div>
-                ) : (
-                  <>
-                    {categorizedChats.today.length > 0 &&
-                      renderChats(categorizedChats.today, "Today")}
-                    {categorizedChats.yesterday.length > 0 &&
-                      renderChats(categorizedChats.yesterday, "Yesterday")}
-                    {categorizedChats.last7days.length > 0 &&
-                      renderChats(
-                        categorizedChats.last7days,
-                        "Previous 7 days"
-                      )}
-                    {categorizedChats.last30days.length > 0 &&
-                      renderChats(
-                        categorizedChats.last30days,
-                        "Previous 30 days"
-                      )}
-                    {categorizedChats.older.length > 0 &&
-                      renderChats(categorizedChats.older, "Older")}
-                  </>
-                )}
+                {categorizedChats.today.length > 0 &&
+                  renderChats(categorizedChats.today, "Today")}
+                {categorizedChats.yesterday.length > 0 &&
+                  renderChats(categorizedChats.yesterday, "Yesterday")}
+                {categorizedChats.last7days.length > 0 &&
+                  renderChats(categorizedChats.last7days, "Previous 7 days")}
+                {categorizedChats.last30days.length > 0 &&
+                  renderChats(categorizedChats.last30days, "Previous 30 days")}
+                {categorizedChats.older.length > 0 &&
+                  renderChats(categorizedChats.older, "Older")}
               </div>
             </ul>
           </div>
@@ -272,6 +255,7 @@ const Sidebar = ({
         shareLink={shareLink}
         linkCreated={linkCreated}
         setLinkCreated={setLinkCreated}
+        isLoading={isLoading}
       />
     </div>
   );
