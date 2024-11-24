@@ -59,9 +59,16 @@ export const chatApi = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    getShareChat: builder.query({
+      query: (shareId) => ({
+        url: `chat/share/${shareId}`,
+        method: "GET",
+        credentials: "include",
+      }),
+    }),
     renameChat: builder.mutation({
       query: ({ chatId, newTitle }) => ({
-        url: "chat/update/title",
+        url: "chat/rename-title",
         method: "PUT",
         body: {
           chatId,
@@ -101,6 +108,7 @@ export const {
   useGetChatsByUserIdQuery,
   useGetChatsByIdQuery,
   useShareChatMutation,
+  useGetShareChatQuery,
   useRenameChatMutation,
   useDeleteChatMutation,
 } = chatApi;

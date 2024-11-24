@@ -29,7 +29,6 @@ const ChatDetailsPage = ({ chatId, setTitle }) => {
   const [refreshChat, { isSuccess: refreshSuccess }] = useRefreshChatMutation();
 
   const isChatSavedRef = useRef(false);
-  const aiShownUpdatedRef = useRef(false);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -38,7 +37,7 @@ const ChatDetailsPage = ({ chatId, setTitle }) => {
     const newConversation = [...conversation, newMessage];
     setConversation(newConversation);
 
-    const aiPlaceholderMessage = { sender: "ai", message: "", aiShown: false };
+    const aiPlaceholderMessage = { sender: "ai", message: "" };
     setConversation((prev) => [...prev, aiPlaceholderMessage]);
 
     const chatData = {
@@ -105,25 +104,6 @@ const ChatDetailsPage = ({ chatId, setTitle }) => {
       refetch();
     }
   }, [isSuccess, refreshSuccess]);
-
-  useEffect(() => {
-    if (!aiShownUpdatedRef.current) {
-      const hasUnshownAiMessages = conversation.some(
-        (msg) => msg.sender === "ai" && !msg.aiShown
-      );
-
-      if (hasUnshownAiMessages) {
-        setConversation((prevConversation) =>
-          prevConversation.map((msg) =>
-            msg.sender === "ai" && !msg.aiShown
-              ? { ...msg, aiShown: true }
-              : msg
-          )
-        );
-        aiShownUpdatedRef.current = true;
-      }
-    }
-  }, [conversation]);
 
   return (
     <>

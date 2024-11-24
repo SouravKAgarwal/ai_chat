@@ -4,6 +4,7 @@ import { catchAsyncError } from "../middlewares/catchAsyncErrors.js";
 import User from "../models/User.js";
 import { generateChatResponse } from "../utils/index.js";
 import { v2 as cloudinary } from "cloudinary";
+import { v4 as uuidv4 } from "uuid";
 
 export const createChat = catchAsyncError(async (req, res, next) => {
   const { userId, prompt, file, image } = req.body;
@@ -39,7 +40,11 @@ export const createChat = catchAsyncError(async (req, res, next) => {
 
     const conversation = [
       { sender: "human", message: prompt, image: image && imageInfo },
-      { sender: "ai", message: aiResponse.response.text },
+      {
+        sender: "ai",
+        message: aiResponse.response.text,
+        usageMetaData: aiResponse.usageMetadata,
+      },
     ];
 
     const title = aiResponse.title.text;
@@ -47,7 +52,6 @@ export const createChat = catchAsyncError(async (req, res, next) => {
       userId,
       title: title.trimEnd(),
       conversation,
-      usageMetadata: aiResponse.usageMetadata,
     });
 
     await chat.save();
@@ -232,7 +236,12 @@ export const shareChat = catchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("User not found.", 404));
     }
 
-    const sharedLink = `${process.env.FRONTEND_URL}/share/${chatId}`;
+    if (!chat.shareUuid) {
+      chat.shareUuid = uuidv4();
+      await chat.save();
+    }
+
+    const sharedLink = `${process.env.FRONTEND_URL}/share/${chat.shareUuid}`;
     const sharedLinkEntry = {
       url: sharedLink,
       chatId,
@@ -258,7 +267,7 @@ export const shareChat = catchAsyncError(async (req, res, next) => {
     res.status(200).json({
       success: true,
       sharedLink,
-      message: "Chat sharing link created successfully.",
+      message: "Share link created successfully.",
     });
   } catch (error) {
     console.error("Error in sharing chat:", error);
@@ -293,5 +302,34 @@ export const renameChatTitle = catchAsyncError(async (req, res, next) => {
   } catch (error) {
     console.error("Error in renaming chat title:", error);
     return next(new ErrorHandler("Failed to rename chat title.", 500));
+  }
+});
+
+export const getSharedChat = catchAsyncError(async (req, res, next) => {
+  const { shareId } = req.params;
+
+  if (!shareId) {
+    return next(new ErrorHandler("Share UUID is required.", 400));
+  }
+
+  try {
+    const chat = await Chat.findOne({ shareUuid: shareId });
+    if (!chat) {
+      return next(new ErrorHandler("Shared chat not found.", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      chat: {
+        title: chat.title,
+        conversation: chat.conversation,
+        userId: chat.userId,
+        createdAt: chat.createdAt,
+        updatedAt: chat.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error in retrieving shared chat:", error);
+    return next(new ErrorHandler("Failed to retrieve shared chat.", 500));
   }
 });

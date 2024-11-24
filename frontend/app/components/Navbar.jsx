@@ -93,19 +93,30 @@ const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
               </div>
             </button>
           )}
-          <button className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[#2f2f2f] focus-visible:bg-[#2f2f2f] focus-visible:outline-0">
-            <div className="flex items-center justify-center overflow-hidden rounded-full">
-              <div className="relative flex" onClick={() => setIsOpen(true)}>
-                <Image
-                  width={32}
-                  height={32}
-                  src={user?.profileImage?.url}
-                  alt={user?.username}
-                  className="rounded-sm"
-                />
+          {user ? (
+            <button className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[#2f2f2f] focus-visible:bg-[#2f2f2f] focus-visible:outline-0">
+              <div className="flex items-center justify-center overflow-hidden rounded-full">
+                <div className="relative flex" onClick={() => setIsOpen(true)}>
+                  <Image
+                    width={32}
+                    height={32}
+                    src={user?.profileImage?.url}
+                    alt={user?.username}
+                    className="rounded-sm"
+                  />
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+          ) : (
+            <button className="flex items-center justify-center outline-0">
+              <div
+                className="relative flex text-sm"
+                onClick={() => setLogin(true)}
+              >
+                <span>Log in &rarr;</span>
+              </div>
+            </button>
+          )}
         </div>
       </div>
       {(login || register || isOpen || shareOpen) && (
@@ -129,8 +140,10 @@ const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
         setShareOpen={setShareOpen}
         handleCreateLink={handleCreateLink}
         shareLink={shareLink}
+        setShareLink={setShareLink}
         linkCreated={linkCreated}
         setLinkCreated={setLinkCreated}
+        setIsOpen={setIsOpen}
       />
     </>
   );

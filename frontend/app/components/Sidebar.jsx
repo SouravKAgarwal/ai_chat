@@ -19,7 +19,10 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import { FiShare, FiEdit2, FiTrash2 } from "react-icons/fi";
-import { useShareChatMutation } from "@/redux/features/chat/chatApi";
+import {
+  useRenameChatMutation,
+  useShareChatMutation,
+} from "@/redux/features/chat/chatApi";
 import ShareDialog from "./chat/ShareDialog";
 
 const Sidebar = ({
@@ -37,13 +40,15 @@ const Sidebar = ({
   const [shareLink, setShareLink] = useState(
     "https://chatai-01.vercel.app/share/..."
   );
-
   const [chatId, setChatId] = useState("");
+  const [editingChatId, setEditingChatId] = useState(null);
+  const [newTitle, setNewTitle] = useState("");
 
   const categorizedChats = categorizeChatsByDate(conversation);
   const { user } = useSelector((state) => state.auth);
   const { isSuccess } = useLogoutQuery(undefined, { skip: !userLogout });
   const [shareChat, { isLoading }] = useShareChatMutation();
+  const [renameChat] = useRenameChatMutation();
 
   const handleCreateLink = async () => {
     try {
@@ -63,6 +68,23 @@ const Sidebar = ({
     }
   }, [isSuccess]);
 
+  const handleRename = (chatId) => {
+    setEditingChatId(chatId);
+    const chat = conversation.find((c) => c._id === chatId);
+    setNewTitle(chat?.title || "");
+  };
+
+  const handleRenameSubmit = async () => {
+    try {
+      await renameChat({ chatId: editingChatId, newTitle });
+      toast.success("Chat title updated!");
+    } catch (err) {
+      toast.error("Failed to update chat title.");
+    } finally {
+      setEditingChatId(null);
+    }
+  };
+
   const handleLinkClick = () => {
     if (sidebarOpen && window.innerWidth < 640) {
       toggleSidebar();
@@ -79,16 +101,30 @@ const Sidebar = ({
             className={`w-full flex items-center justify-between text-sm group p-2 relative ${
               location.pathname === `/chat/${chat._id}`
                 ? "bg-[#222] rounded-lg"
-                : "hover:bg-[#222] hover:rounded-lg"
+                : "hover:bg-[#1c1c1c] hover:rounded-lg"
             }`}
           >
-            <Link
-              href={`/chat/${chat._id}`}
-              onClick={handleLinkClick}
-              className="overflow-hidden text-ellipsis whitespace-nowrap flex-grow pr-2"
-            >
-              {removeMarkdown(chat.title).trimEnd()}
-            </Link>
+            {editingChatId === chat._id ? (
+              <input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleRenameSubmit();
+                  if (e.key === "Escape") setEditingChatId(null);
+                }}
+                className="bg-transparent border p-2 rounded border-gray-500 focus:outline-none text-white w-full"
+                autoFocus
+              />
+            ) : (
+              <Link
+                href={`/chat/${chat._id}`}
+                onClick={handleLinkClick}
+                className="overflow-hidden text-ellipsis whitespace-nowrap flex-grow pr-2"
+              >
+                {removeMarkdown(chat.title).trimEnd()}
+              </Link>
+            )}
             <div className="relative pl-2">
               <PiDotsThreeBold
                 size={20}
@@ -118,7 +154,7 @@ const Sidebar = ({
                         <ListboxOption
                           className="flex items-center px-3 py-2 cursor-pointer border-b border-[hsla(0,0%,100%,.15)] hover:bg-[#444] text-sm"
                           value="rename"
-                          onClick={() => console.log("Rename clicked")}
+                          onClick={() => handleRename(chat._id)}
                         >
                           <FiEdit2 className="mr-2" />
                           Rename
@@ -178,7 +214,7 @@ const Sidebar = ({
                 <Link
                   href="/"
                   onClick={handleLinkClick}
-                  className="font-semibold flex gap-2 items-center"
+                  className="font-semibold flex gap-2 items-center hover:bg-[#1c1c1c] hover:rounded-lg p-2 -ml-2"
                 >
                   <FaRainbow size={16} />
                   MyGPT
@@ -221,14 +257,14 @@ const Sidebar = ({
               </div>
             </div>
           ) : (
-            <div className="p-4">
-              <button
+            <button className="p-3">
+              <div
                 onClick={() => setLogin(true)}
                 className="text-sm font-semibold text-gray-900 dark:text-white cursor-pointer"
               >
                 <span>Log in &rarr;</span>
-              </button>
-            </div>
+              </div>
+            </button>
           )}
         </div>
       )}
@@ -253,9 +289,11 @@ const Sidebar = ({
         setShareOpen={setShareOpen}
         handleCreateLink={handleCreateLink}
         shareLink={shareLink}
+        setShareLink={setShareLink}
         linkCreated={linkCreated}
         setLinkCreated={setLinkCreated}
         isLoading={isLoading}
+        setIsOpen={setIsOpen}
       />
     </div>
   );

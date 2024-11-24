@@ -64,10 +64,6 @@ const NewChat = ({ user }) => {
 
     const newMessage = { sender: "human", message: input, image };
     setConversation((prevConversation) => [...prevConversation, newMessage]);
-    setConversation((prevConversation) => [
-      ...prevConversation,
-      { sender: "ai", message: "" },
-    ]);
 
     const chatData = {
       userId: user._id,
@@ -80,12 +76,12 @@ const NewChat = ({ user }) => {
       setLoading(true);
       const createdChat = await createChat(chatData).unwrap();
       setTitle(createdChat?.chat?.title);
-      const aiMessage = createdChat.chat.conversation.slice(-1)[0].message;
+      const aiMessage = createdChat.chat.conversation.slice(-1)[0];
 
       setConversation((prevConversation) => {
         const updatedConversation = [...prevConversation];
         const lastAiMessageIndex = updatedConversation.length - 1;
-        updatedConversation[lastAiMessageIndex].message = aiMessage;
+        updatedConversation[lastAiMessageIndex] = aiMessage;
 
         return updatedConversation;
       });
@@ -154,7 +150,7 @@ const NewChat = ({ user }) => {
       >
         <Navbar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <div className="flex flex-col h-full overflow-auto">
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto hide-scrollbar">
             <ChatWindow
               className="overflow-y-auto"
               setFile={setFile}
