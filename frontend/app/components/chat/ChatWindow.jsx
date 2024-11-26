@@ -4,6 +4,7 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { GoArrowDown } from "react-icons/go";
 import { tabs } from "../../utils";
+import Image from "next/image";
 
 const ChatWindow = ({
   className,
@@ -86,10 +87,13 @@ const ChatWindow = ({
             }`}
           >
             {msg.sender === "ai" && (
-              <div className="mr-2 rounded-full hidden md:block p-2 mt-4 bg-transparent border border-[#ddd] dark:border-[#bbb]">
-                <FaRainbow
-                  size={14}
-                  className="text-3xl text-[#666] dark:text-[#ccc]"
+              <div className="mr-2 rounded-full hidden md:block mt-2">
+                <Image
+                  src="/logo_image.png"
+                  height={1000}
+                  width={1000}
+                  className="h-8 w-8 object-cover object-center"
+                  alt="logo"
                 />
               </div>
             )}

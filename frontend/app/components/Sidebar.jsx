@@ -24,6 +24,7 @@ import {
   useShareChatMutation,
 } from "@/redux/features/chat/chatApi";
 import ShareDialog from "./chat/ShareDialog";
+import { useLoadUserQuery } from "@/redux/features/api/apiSlices";
 
 const Sidebar = ({
   sidebarOpen,
@@ -46,8 +47,9 @@ const Sidebar = ({
 
   const categorizedChats = categorizeChatsByDate(conversation);
   const { user } = useSelector((state) => state.auth);
+  const { refetch } = useLoadUserQuery({}, { refetchOnMountOrArgChange: true });
   const { isSuccess } = useLogoutQuery(undefined, { skip: !userLogout });
-  const [shareChat, { isLoading }] = useShareChatMutation();
+  const [shareChat, { isSuccess: shareChatSuccess }] = useShareChatMutation();
   const [renameChat] = useRenameChatMutation();
 
   const handleCreateLink = async () => {
@@ -63,10 +65,14 @@ const Sidebar = ({
 
   useEffect(() => {
     if (isSuccess) {
+      refetch();
       setUserLogout(false);
       toast.success("Logged out successfully!");
     }
-  }, [isSuccess]);
+    if (shareChatSuccess) {
+      refetch();
+    }
+  }, [isSuccess, shareChatSuccess]);
 
   const handleRename = (chatId) => {
     setEditingChatId(chatId);
@@ -221,18 +227,23 @@ const Sidebar = ({
                 </Link>
               </li>
 
-              <div className="mt-3">
-                {categorizedChats.today.length > 0 &&
-                  renderChats(categorizedChats.today, "Today")}
-                {categorizedChats.yesterday.length > 0 &&
-                  renderChats(categorizedChats.yesterday, "Yesterday")}
-                {categorizedChats.last7days.length > 0 &&
-                  renderChats(categorizedChats.last7days, "Previous 7 days")}
-                {categorizedChats.last30days.length > 0 &&
-                  renderChats(categorizedChats.last30days, "Previous 30 days")}
-                {categorizedChats.older.length > 0 &&
-                  renderChats(categorizedChats.older, "Older")}
-              </div>
+              {user && (
+                <div className="mt-3">
+                  {categorizedChats.today.length > 0 &&
+                    renderChats(categorizedChats.today, "Today")}
+                  {categorizedChats.yesterday.length > 0 &&
+                    renderChats(categorizedChats.yesterday, "Yesterday")}
+                  {categorizedChats.last7days.length > 0 &&
+                    renderChats(categorizedChats.last7days, "Previous 7 days")}
+                  {categorizedChats.last30days.length > 0 &&
+                    renderChats(
+                      categorizedChats.last30days,
+                      "Previous 30 days"
+                    )}
+                  {categorizedChats.older.length > 0 &&
+                    renderChats(categorizedChats.older, "Older")}
+                </div>
+              )}
             </ul>
           </div>
         )}
@@ -283,6 +294,7 @@ const Sidebar = ({
         setIsOpen={setIsOpen}
         user={user}
         setUserLogout={setUserLogout}
+        refetch={refetch}
       />
       <ShareDialog
         shareOpen={shareOpen}
@@ -292,7 +304,6 @@ const Sidebar = ({
         setShareLink={setShareLink}
         linkCreated={linkCreated}
         setLinkCreated={setLinkCreated}
-        isLoading={isLoading}
         setIsOpen={setIsOpen}
       />
     </div>

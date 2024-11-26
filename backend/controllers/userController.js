@@ -215,15 +215,12 @@ export const updateAccessToken = catchAsyncError(async (req, res, next) => {
 export const getUserInfo = catchAsyncError(async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const userJSON = await redis.get(userId);
 
-    if (userJSON) {
-      const user = JSON.parse(userJSON);
-      res.status(201).json({
-        success: true,
-        user,
-      });
-    }
+    const user = await User.findById(userId);
+    res.status(201).json({
+      success: true,
+      user,
+    });
   } catch (error) {
     return next(new ErrorHandler(error.message, 404));
   }

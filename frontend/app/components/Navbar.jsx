@@ -13,6 +13,7 @@ import Link from "next/link";
 import { FiShare } from "react-icons/fi";
 import { useShareChatMutation } from "@/redux/features/chat/chatApi";
 import ShareDialog from "./chat/ShareDialog";
+import { useLoadUserQuery } from "@/redux/features/api/apiSlices";
 
 const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
   const [userLogout, setUserLogout] = useState(false);
@@ -26,8 +27,9 @@ const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
   );
 
   const { user } = useSelector((state) => state.auth);
+  const { refetch } = useLoadUserQuery({}, { refetchOnMountOrArgChange: true });
 
-  const [shareChat] = useShareChatMutation();
+  const [shareChat, { isSuccess: shareChatSuccess }] = useShareChatMutation();
   const { isSuccess } = useLogoutQuery(undefined, {
     skip: !userLogout,
   });
@@ -45,10 +47,14 @@ const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
 
   useEffect(() => {
     if (isSuccess) {
+      refetch();
       setUserLogout(false);
       toast.success("Logged out successfully!");
     }
-  }, [isSuccess]);
+    if (shareChatSuccess) {
+      refetch();
+    }
+  }, [isSuccess, shareChatSuccess]);
 
   return (
     <>
@@ -134,6 +140,7 @@ const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
         setIsOpen={setIsOpen}
         user={user}
         setUserLogout={setUserLogout}
+        refetch={refetch}
       />
       <ShareDialog
         shareOpen={shareOpen}

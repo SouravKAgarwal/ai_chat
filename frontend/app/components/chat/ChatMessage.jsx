@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { formatResponse } from "../../utils";
 import { HiOutlineXMark } from "react-icons/hi2";
-import Markdown from "react-markdown";
+import Image from "next/image";
 
 const ChatMessage = ({
   msg,
@@ -75,11 +75,13 @@ const ChatMessage = ({
           <>
             {(image || msg?.image?.imageUrl) && (
               <div className="relative flex justify-start mb-4">
-                <img
+                <Image
                   src={msg?.image?.imageUrl || image}
                   className="h-40 w-full max-w-80 object-cover object-center rounded-xl cursor-pointer"
                   alt="preview-img"
                   onClick={onImageClick}
+                  width={1000}
+                  height={1000}
                 />
               </div>
             )}

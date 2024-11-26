@@ -333,3 +333,55 @@ export const getSharedChat = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Failed to retrieve shared chat.", 500));
   }
 });
+
+export const deleteSharedChat = catchAsyncError(async (req, res, next) => {
+  const { shareId } = req.params;
+
+  if (!shareId) {
+    return next(new ErrorHandler("Share UUID is required.", 400));
+  }
+
+  try {
+    const chat = await Chat.findById(shareId);
+
+    if (!chat) {
+      return next(new ErrorHandler("Shared chat not found.", 404));
+    }
+
+    const user = await User.findOne({ "sharedLinks.chatId": chat._id });
+
+    if (user) {
+      user.sharedLinks = user.sharedLinks.filter(
+        (link) => link.chatId.toString() !== chat._id.toString()
+      );
+
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Shared chat deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Error in deleting shared chat:", error);
+    return next(new ErrorHandler("Failed to delete shared chat.", 500));
+  }
+});
+
+export const deleteAllChat = catchAsyncError(async (req, res, next) => {
+  try {
+    const result = await Chat.deleteMany({ userId: req.user._id });
+
+    if (result.deletedCount === 0) {
+      return next(new ErrorHandler("No chats found to delete.", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "All chats deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Error in deleting all chats:", error);
+    return next(new ErrorHandler("Failed to delete all chats.", 500));
+  }
+});

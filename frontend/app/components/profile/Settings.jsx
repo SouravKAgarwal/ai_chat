@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Description,
   Dialog,
   DialogPanel,
   DialogTitle,
@@ -11,23 +12,107 @@ import {
 import { HiOutlineXMark } from "react-icons/hi2";
 import { MdSettings, MdPerson, MdMic, MdSecurity } from "react-icons/md";
 import { IoMdBrush } from "react-icons/io";
+import { BsDatabaseFillGear, BsThreeDots } from "react-icons/bs";
 import { useTheme } from "next-themes";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { RiLinkM } from "react-icons/ri";
+import { BiTrash } from "react-icons/bi";
+import dayjs from "dayjs";
+import Link from "next/link";
+import {
+  useDeleteAllChatsMutation,
+  useDeleteShareChatMutation,
+} from "@/redux/features/chat/chatApi";
 
-const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
+const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
+  return (
+    <Dialog open={isOpen} onClose={onClose}>
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <DialogPanel className="bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-md">
+          <div className="flex justify-between items-center p-4 px-6 border-b dark:border-[#444]">
+            <DialogTitle className="text-lg font-medium">
+              Confirm Delete
+            </DialogTitle>
+            <div
+              className="cursor-pointer hover:bg-[#666] p-1 rounded-full"
+              onClick={onClose}
+            >
+              <HiOutlineXMark className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="p-4">
+            <Description className="text-sm ">
+              Are you sure you want to delete all chats? This action cannot be
+              undone.
+            </Description>
+            <div className="mt-4 flex justify-end gap-4">
+              <button
+                onClick={onClose}
+                className="text-[#ececec] bg-transparent hover:bg-[#343333] border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onConfirm}
+                className="text-[#ececec] bg-red-500 hover:bg-red-600 border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </DialogPanel>
+      </div>
+    </Dialog>
+  );
+};
+
+const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
   const { theme, setTheme } = useTheme();
   const [language, setLanguage] = useState("en");
   const [activeTab, setActiveTab] = useState("general");
+  const [manageTab, setManageTab] = useState("");
+  const [deletedLink, setDeletedLink] = useState(null);
+  const [openDeleteConf, setOpenDeleteConf] = useState(false);
+
+  const [deleteShareChat, { isSuccess }] = useDeleteShareChatMutation();
+  const [deleteAllChats, { isSuccess: deleteAllChatSuccess }] =
+    useDeleteAllChatsMutation();
+
+  const sharedLinks = user?.sharedLinks || [];
 
   const logoutHandler = () => {
     setIsOpen(false);
     setUserLogout(true);
   };
 
+  const handleDeleteLinkWithFade = (chatId) => {
+    setDeletedLink(chatId);
+    setTimeout(async () => {
+      await deleteShareChat(chatId);
+    }, 200);
+  };
+
+  // const delAllChats = async () => await deleteAllChats();
+
+  useEffect(() => {
+    if (isSuccess) {
+      refetch();
+      setDeletedLink(null);
+    }
+    if (deleteAllChatSuccess) {
+      refetch();
+    }
+  }, [isSuccess, deleteAllChatSuccess]);
+
   const tabs = [
     { id: "general", label: "General", icon: <MdSettings /> },
     { id: "profile", label: "Profile", icon: <MdPerson /> },
     { id: "preferences", label: "Preferences", icon: <IoMdBrush /> },
+    {
+      id: "data-controls",
+      label: "Data controls",
+      icon: <BsDatabaseFillGear />,
+    },
     { id: "speech", label: "Speech", icon: <MdMic /> },
     { id: "security", label: "Security", icon: <MdSecurity /> },
   ];
@@ -100,9 +185,24 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
       ),
     },
     {
+      label: "Delete all chats",
       control: (
         <button
-          className="relative block rounded-lg text-center text-sm px-3 py-1.5 outline-none bg-red-500 text-white hover:bg-red-600"
+          className="text-[#ececec] bg-red-500 border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2 hover:bg-red-600"
+          onClick={() => {
+            setIsOpen(false);
+            setOpenDeleteConf(true);
+          }}
+        >
+          Delete All
+        </button>
+      ),
+    },
+    {
+      label: "Log out on this device",
+      control: (
+        <button
+          className="text-[#ececec] bg-transparent border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2"
           onClick={logoutHandler}
         >
           Logout
@@ -130,6 +230,134 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
     },
   ];
 
+  const dataControlSettings = [
+    {
+      label: "Shared Links",
+      control: (
+        <button
+          onClick={() => setManageTab("shared-link")}
+          className="text-[#ececec] bg-transparent border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2"
+        >
+          Manage
+        </button>
+      ),
+    },
+    {
+      label: "Export Data",
+      control: (
+        <button className="text-[#ececec] bg-transparent border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2">
+          Export
+        </button>
+      ),
+    },
+    {
+      label: "Delete Account",
+      control: (
+        <button className="text-[#ececec] border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2 bg-red-500 hover:bg-red-600">
+          Delete
+        </button>
+      ),
+    },
+  ];
+
+  const renderSharedLinksDialog = () => (
+    <Dialog open={manageTab === "shared-link"} onClose={() => setManageTab("")}>
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-2xl">
+          <div className="flex justify-between items-center p-4 border-b dark:border-[hsla(0,0%,100%,.1)]">
+            <DialogTitle className="text-lg font-medium">
+              Shared Links
+            </DialogTitle>
+            <HiOutlineXMark
+              className="w-5 h-5 cursor-pointer"
+              onClick={() => setManageTab("")}
+            />
+          </div>
+          <>
+            {sharedLinks.length > 0 ? (
+              <div className="flex-grow overflow-y-auto p-4 sm:p-6">
+                <div className="overflow-y-auto hide-scrollbar text-sm h-80">
+                  <table className="w-full border-separate border-spacing-0">
+                    <thead>
+                      <tr>
+                        <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-0 text-left">
+                          Name
+                        </th>
+                        <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-0 text-left">
+                          Date shared
+                        </th>
+                        <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-4 last:border-r-0 text-right">
+                          <button>
+                            <BsThreeDots />
+                          </button>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sharedLinks.map((link) => (
+                        <tr key={link.chatId}>
+                          <td
+                            className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
+                              deletedLink === link.chatId ? "text-white/50" : ""
+                            }`}
+                          >
+                            <div className="flex min-h-[40px] items-center">
+                              <Link
+                                href={link.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={`inline-flex items-center gap-2 align-top ${
+                                  deletedLink === link.chatId
+                                    ? "text-white/50"
+                                    : "text-blue-500 dark:text-blue-400"
+                                } underline`}
+                              >
+                                <RiLinkM className="w-5 h-5" />
+                                {link.title}
+                              </Link>
+                            </div>
+                          </td>
+                          <td
+                            className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
+                              deletedLink === link.chatId ? "text-white/50" : ""
+                            }`}
+                          >
+                            <div className="flex min-h-[40px] items-center">
+                              {dayjs(link.createdAt).format("MMMM D, YYYY")}
+                            </div>
+                          </td>
+                          <td
+                            className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-right last:border-r-0 ${
+                              deletedLink === link.chatId ? "text-white/50" : ""
+                            }`}
+                          >
+                            <div className="flex justify-end min-h-[40px] items-center">
+                              <div className="text-md flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() =>
+                                    handleDeleteLinkWithFade(link.chatId)
+                                  }
+                                >
+                                  <BiTrash className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <p className="p-4 min-h-80">No shared links available.</p>
+            )}
+          </>
+        </DialogPanel>
+      </div>
+    </Dialog>
+  );
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "general":
@@ -138,7 +366,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
             {generalSettings.map((setting, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center text-sm py-3 border-b border-[#666] last:border-none first:pt-0"
+                className="flex justify-between items-center text-sm py-2.5 border-b border-[hsla(0,0%,100%,.1)] last:border-none first:pt-0"
               >
                 <span>{setting.label}</span>
                 {setting.control}
@@ -152,7 +380,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
             {profileSettings.map((setting, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center text-sm py-3 border-b border-[#666] last:border-none first:pt-0"
+                className="flex justify-between items-center text-sm py-2.5 border-b border-[hsla(0,0%,100%,.1)] last:border-none first:pt-0"
               >
                 <span>{setting.label}</span>
                 <span className="text-black dark:text-white p-1">
@@ -163,60 +391,83 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout }) => {
             ))}
           </div>
         );
-      case "preferences":
-        return <div>Personalization settings content</div>;
-      case "speech":
-        return <div>Speech settings content</div>;
-      case "security":
-        return <div>Security settings content</div>;
+      case "data-controls":
+        return (
+          <div className="flex flex-col">
+            {dataControlSettings.map((setting, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center text-sm py-2.5 border-b border-[hsla(0,0%,100%,.1)] last:border-none first:pt-0"
+              >
+                <span>{setting.label}</span>
+                <span className="text-black dark:text-white p-1">
+                  {setting.value}
+                </span>
+                {setting.control}
+              </div>
+            ))}
+          </div>
+        );
       default:
         return null;
     }
   };
 
   return (
-    <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <DialogPanel className="relative bg-[#acacac] dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-xl min-h-96">
-          <div className="flex justify-between items-center p-4 px-6 border-b border-[#666]">
-            <DialogTitle className="text-lg font-medium leading-6">
-              Settings
-            </DialogTitle>
-            <div
-              className="cursor-pointer hover:bg-[#666] p-1 rounded-full"
-              onClick={() => setIsOpen(false)}
-            >
-              <HiOutlineXMark className="w-5 h-5" />
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row">
-            <div className="w-full sm:w-1/4 p-4">
-              <div className="flex flex-wrap md:flex-col gap-3 md:gap-0 item-start">
-                {tabs.map((tab) => (
-                  <div
-                    key={tab.id}
-                    className={`flex items-center p-2 rounded-lg text-sm cursor-pointer ${
-                      activeTab === tab.id
-                        ? "bg-[#424242] text-[#d5d5d5]"
-                        : "bg-transparent"
-                    }`}
-                    onClick={() => setActiveTab(tab.id)}
-                  >
-                    {tab.icon}
-                    <span className="ml-2">{tab.label}</span>
-                  </div>
-                ))}
+    <>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-xl min-h-96">
+            <div className="flex justify-between items-center p-4 px-6 border-b dark:border-[#444]">
+              <DialogTitle className="text-lg font-medium">
+                Settings
+              </DialogTitle>
+              <div
+                className="cursor-pointer hover:bg-[#666] p-1 rounded-full"
+                onClick={() => setIsOpen(false)}
+              >
+                <HiOutlineXMark className="w-5 h-5" />
               </div>
             </div>
-
-            <div className="w-full sm:w-3/4 p-4">
-              <div>{renderTabContent()}</div>
+            <div className="flex flex-col sm:flex-row">
+              <div className="w-full sm:w-[28%] p-4">
+                <div className="flex flex-wrap md:flex-col gap-3 md:gap-0">
+                  {tabs.map((tab) => (
+                    <div
+                      key={tab.id}
+                      className={`flex items-center p-2 rounded-lg text-sm cursor-pointer ${
+                        activeTab === tab.id
+                          ? "bg-[#424242] text-[#d5d5d5]"
+                          : "bg-transparent"
+                      }`}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      {tab.icon}
+                      <span className="ml-2">{tab.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="w-full sm:w-[72%] p-4">{renderTabContent()}</div>
             </div>
-          </div>
-        </DialogPanel>
-      </div>
-    </Dialog>
+          </DialogPanel>
+        </div>
+      </Dialog>
+      {renderSharedLinksDialog()}
+      {openDeleteConf && (
+        <div className="fixed inset-0 z-40 bg-black bg-opacity-70" />
+      )}
+      {openDeleteConf && (
+        <DeleteConfirmation
+          isOpen={openDeleteConf}
+          onClose={() => setOpenDeleteConf(false)}
+          onConfirm={() => {
+            delAllChats();
+            setOpenDeleteConf(false);
+          }}
+        />
+      )}
+    </>
   );
 };
 
