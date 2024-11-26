@@ -16,7 +16,7 @@ const ShareChat = ({ data }) => {
   }, [data]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-[100dvh]">
       <div className="grow overflow-y-auto hide-scrollbar bg-[#212121] pt-2">
         <div className="mx-auto flex flex-1 gap-4 text-base md:gap-5 lg:gap-6 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem]">
           <div className="w-full border-b border-gray-100 px-4 pb-4 pt-3 sm:mb-2 sm:pb-6 sm:pt-8 md:px-0">
