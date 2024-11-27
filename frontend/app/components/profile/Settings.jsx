@@ -25,6 +25,7 @@ import {
   useDeleteShareChatMutation,
 } from "@/redux/features/chat/chatApi";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
   return (
@@ -122,21 +123,22 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
   }, [isSuccess, deleteAllChatSuccess, selectedVoice]);
 
   useEffect(() => {
-    const handleVoicesChanged = () => {
-      const availableVoices = window.speechSynthesis.getVoices();
-      const microsoftVoices = availableVoices
-        .filter((voice) => voice.name.includes("Microsoft"))
-        .map((voice) => voice.name.split(" ")[1]);
+    const getAvailableVoices = () => {
+      const voice = window.speechSynthesis.getVoices();
+      toast.success(voice.length);
 
-      setVoices(microsoftVoices);
+      if (voice.length === 0) {
+        window.speechSynthesis.onvoiceschanged = getAvailableVoices;
+      } else {
+        const microsoftVoices = voice
+          .filter((item) => item.name.includes("Microsoft"))
+          .map((item) => item.name.split(" ")[1]);
+
+        setVoices(microsoftVoices);
+      }
     };
 
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = handleVoicesChanged;
-    }
-
-    window.speechSynthesis.getVoices();
-    handleVoicesChanged();
+    getAvailableVoices();
   }, []);
 
   const handlePlay = () => {
