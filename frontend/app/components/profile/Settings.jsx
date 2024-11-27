@@ -124,8 +124,9 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
 
   useEffect(() => {
     const handleVoicesChanged = () => {
-      const availableVoices = speechSynthesis.getVoices();
-      toast.success(availableVoices.length);
+      const availableVoices = speechSynthesis
+        .getVoices()
+        .filter((i) => i.localService === true);
       setVoices(availableVoices);
     };
 
@@ -142,9 +143,8 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       );
       const availableVoices = speechSynthesis.getVoices();
       const fullVoice = availableVoices.find(
-        (voice) => voice.name === selectedVoice
+        (voice) => voice.name === selectedVoice && voice.localService
       );
-      toast.success(fullVoice.voiceURI);
       utterance.voice = fullVoice;
       speechSynthesis.speak(utterance);
     }
