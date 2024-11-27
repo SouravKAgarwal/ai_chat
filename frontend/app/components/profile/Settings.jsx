@@ -81,6 +81,8 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
   );
   const [voices, setVoices] = useState([]);
 
+  console.log(selectedVoice);
+
   const [deleteShareChat, { isSuccess }] = useDeleteShareChatMutation();
   const [deleteAllChats, { isSuccess: deleteAllChatSuccess }] =
     useDeleteAllChatsMutation();
@@ -123,22 +125,20 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
   }, [isSuccess, deleteAllChatSuccess, selectedVoice]);
 
   useEffect(() => {
-    const getAvailableVoices = () => {
-      const voice = window.speechSynthesis.getVoices();
-      toast.success(voice.length);
+    const handleVoicesChanged = () => {
+      const availableVoices = speechSynthesis.getVoices();
+      toast.success(availableVoices.length);
+      setVoices(availableVoices);
 
-      if (voice.length === 0) {
-        window.speechSynthesis.onvoiceschanged = getAvailableVoices;
-      } else {
-        const microsoftVoices = voice
-          .filter((item) => item.name.includes("Microsoft"))
-          .map((item) => item.name.split(" ")[1]);
-
-        setVoices(microsoftVoices);
+      if (availableVoices.length > 1 && !selectedVoice) {
+        setSelectedVoice(microsoftVoices[1]);
       }
     };
 
-    getAvailableVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = handleVoicesChanged;
+    }
+    handleVoicesChanged();
   }, []);
 
   const handlePlay = () => {
@@ -146,12 +146,12 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       const utterance = new SpeechSynthesisUtterance(
         "Hello, this is a test message."
       );
-      const availableVoices = window.speechSynthesis.getVoices();
+      const availableVoices = speechSynthesis.getVoices();
       const fullVoice = availableVoices.find(
-        (voice) => voice.name.split(" ")[1] === selectedVoice
+        (voice) => voice.name === selectedVoice
       );
       utterance.voice = fullVoice;
-      window.speechSynthesis.speak(utterance);
+      speechSynthesis.speak(utterance);
     }
   };
 
@@ -332,18 +332,18 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
                 {selectedVoice || "Select a Voice"}
                 <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-black dark:text-white" />
               </ListboxButton>
-              <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out overflow-auto max-h-48 hide-scrollbar">
+              <ListboxOptions className="absolute w-max z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out overflow-auto max-h-48 hide-scrollbar">
                 {voices.map((voice, index) => (
                   <ListboxOption
                     key={index}
-                    value={voice}
+                    value={voice.name}
                     className={({ active, selected }) =>
-                      `flex w-24 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
+                      `flex cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
                         active ? "bg-[#333] text-white" : "text-white"
                       }`
                     }
                   >
-                    {({ selected }) => <span>{voice}</span>}
+                    {({ selected }) => <span>{voice.name}</span>}
                   </ListboxOption>
                 ))}
               </ListboxOptions>
@@ -555,7 +555,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     <>
       <Dialog open={isOpen} onClose={handleClose}>
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-xl min-h-96">
+          <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-2xl min-h-96">
             <div className="flex justify-between items-center p-4 px-6 border-b dark:border-[#444]">
               <DialogTitle className="text-lg font-medium my-[.25rem] first:mt-[.25rem]">
                 Settings
