@@ -144,7 +144,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       const fullVoice = availableVoices.find(
         (voice) => voice.name === selectedVoice
       );
-      toast.success(fullVoice.lang, fullVoice.voiceURI);
+      toast.success(fullVoice.voiceURI);
       utterance.voice = fullVoice;
       speechSynthesis.speak(utterance);
     }
