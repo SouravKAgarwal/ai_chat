@@ -123,21 +123,16 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
 
   useEffect(() => {
     const handleVoicesChanged = () => {
-      const availableVoices = speechSynthesis.getVoices();
+      const availableVoices = window.speechSynthesis.getVoices();
       const microsoftVoices = availableVoices
         .filter((voice) => voice.name.includes("Microsoft"))
         .map((voice) => voice.name.split(" ")[1]);
 
       setVoices(microsoftVoices);
-
-      if (microsoftVoices.length > 1 && !selectedVoice) {
-        setSelectedVoice(microsoftVoices[1]);
-        localStorage.setItem("selectedVoice", microsoftVoices[1]);
-      }
     };
 
     if (speechSynthesis.onvoiceschanged !== undefined) {
-      speechSynthesis.onvoiceschanged = handleVoicesChanged;
+      window.speechSynthesis.onvoiceschanged = handleVoicesChanged;
     }
     handleVoicesChanged();
   }, []);
@@ -147,12 +142,12 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       const utterance = new SpeechSynthesisUtterance(
         "Hello, this is a test message."
       );
-      const availableVoices = speechSynthesis.getVoices();
+      const availableVoices = window.speechSynthesis.getVoices();
       const fullVoice = availableVoices.find(
         (voice) => voice.name.split(" ")[1] === selectedVoice
       );
       utterance.voice = fullVoice;
-      speechSynthesis.speak(utterance);
+      window.speechSynthesis.speak(utterance);
     }
   };
 
@@ -333,13 +328,13 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
                 {selectedVoice || "Select a Voice"}
                 <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-black dark:text-white" />
               </ListboxButton>
-              <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out">
-                {voices.map((voice) => (
+              <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out overflow-auto max-h-48 hide-scrollbar">
+                {voices.map((voice, index) => (
                   <ListboxOption
-                    key={voice}
+                    key={index}
                     value={voice}
                     className={({ active, selected }) =>
-                      `flex w-20 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
+                      `flex w-24 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
                         active ? "bg-[#333] text-white" : "text-white"
                       }`
                     }
@@ -427,7 +422,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
                               </div>
                             </td>
                             <td
-                              className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
+                              className={`border-x-0 border-t-0 border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
                                 deletedLink === link.chatId
                                   ? "text-white/50"
                                   : ""
@@ -442,7 +437,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
                               </div>
                             </td>
                             <td
-                              className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-right last:border-r-0 ${
+                              className={`border-x-0 border-t-0 border-[hsla(0,0%,100%,.1)] align-top pr-4 text-right last:border-r-0 ${
                                 deletedLink === link.chatId
                                   ? "text-white/50"
                                   : ""

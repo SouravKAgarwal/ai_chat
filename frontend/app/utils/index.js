@@ -19,14 +19,15 @@ export const handleTextToSpeech = (
   setConversation
 ) => {
   const selectedVoiceName = localStorage.getItem("selectedVoice");
-  const availableVoices = speechSynthesis.getVoices();
+  const availableVoices = window.speechSynthesis.getVoices();
   const selectedVoice = availableVoices.find(
     (voice) => voice.name.split(" ")[1] === selectedVoiceName
   );
 
-  const utterance = new SpeechSynthesisUtterance(removeMarkdown(text));
+  let utterance;
 
-  if (selectedVoice) {
+  if ("speechSynthesis" in window) {
+    utterance = new SpeechSynthesisUtterance(removeMarkdown(text));
     utterance.voice = selectedVoice;
   }
 
@@ -42,13 +43,13 @@ export const handleTextToSpeech = (
     utterance.onend = () => {
       setConversation((prevConversation) =>
         prevConversation.map((msg, idx) =>
-          idx === index ? { ...msg, mute: msg.mute } : msg
+          idx === index ? { ...msg, mute: !msg.mute } : msg
         )
       );
     };
-    speechSynthesis.speak(utterance);
+    window.speechSynthesis.speak(utterance);
   } else {
-    speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
   }
 };
 
