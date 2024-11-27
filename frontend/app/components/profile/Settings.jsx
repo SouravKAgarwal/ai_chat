@@ -23,6 +23,7 @@ import {
   useDeleteAllChatsMutation,
   useDeleteShareChatMutation,
 } from "@/redux/features/chat/chatApi";
+import { useRouter } from "next/navigation";
 
 const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
   return (
@@ -30,7 +31,7 @@ const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
         <DialogPanel className="bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-md">
           <div className="flex justify-between items-center p-4 px-6 border-b dark:border-[#444]">
-            <DialogTitle className="text-lg font-medium">
+            <DialogTitle className="text-lg font-medium my-[.25rem] first:mt-[.25rem]">
               Confirm Delete
             </DialogTitle>
             <div
@@ -79,6 +80,13 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     useDeleteAllChatsMutation();
 
   const sharedLinks = user?.sharedLinks || [];
+  const router = useRouter();
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setActiveTab("general");
+    setManageTab("");
+  };
 
   const logoutHandler = () => {
     setIsOpen(false);
@@ -92,7 +100,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     }, 200);
   };
 
-  // const delAllChats = async () => await deleteAllChats();
+  const delAllChats = async () => await deleteAllChats({ userId: user?._id });
 
   useEffect(() => {
     if (isSuccess) {
@@ -101,6 +109,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     }
     if (deleteAllChatSuccess) {
       refetch();
+      router.push("/");
     }
   }, [isSuccess, deleteAllChatSuccess]);
 
@@ -260,103 +269,132 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     },
   ];
 
-  const renderSharedLinksDialog = () => (
-    <Dialog open={manageTab === "shared-link"} onClose={() => setManageTab("")}>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-        <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-2xl">
-          <div className="flex justify-between items-center p-4 border-b dark:border-[hsla(0,0%,100%,.1)]">
-            <DialogTitle className="text-lg font-medium">
-              Shared Links
-            </DialogTitle>
-            <HiOutlineXMark
-              className="w-5 h-5 cursor-pointer"
-              onClick={() => setManageTab("")}
-            />
-          </div>
-          <>
-            {sharedLinks.length > 0 ? (
-              <div className="flex-grow overflow-y-auto p-4 sm:p-6">
-                <div className="overflow-y-auto hide-scrollbar text-sm h-80">
-                  <table className="w-full border-separate border-spacing-0">
-                    <thead>
-                      <tr>
-                        <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-0 text-left">
-                          Name
-                        </th>
-                        <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-0 text-left">
-                          Date shared
-                        </th>
-                        <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-4 last:border-r-0 text-right">
-                          <button>
-                            <BsThreeDots />
-                          </button>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sharedLinks.map((link) => (
-                        <tr key={link.chatId}>
-                          <td
-                            className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
-                              deletedLink === link.chatId ? "text-white/50" : ""
-                            }`}
-                          >
-                            <div className="flex min-h-[40px] items-center">
-                              <Link
-                                href={link.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className={`inline-flex items-center gap-2 align-top ${
-                                  deletedLink === link.chatId
-                                    ? "text-white/50"
-                                    : "text-blue-500 dark:text-blue-400"
-                                } underline`}
-                              >
-                                <RiLinkM className="w-5 h-5" />
-                                {link.title}
-                              </Link>
-                            </div>
-                          </td>
-                          <td
-                            className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
-                              deletedLink === link.chatId ? "text-white/50" : ""
-                            }`}
-                          >
-                            <div className="flex min-h-[40px] items-center">
-                              {dayjs(link.createdAt).format("MMMM D, YYYY")}
-                            </div>
-                          </td>
-                          <td
-                            className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-right last:border-r-0 ${
-                              deletedLink === link.chatId ? "text-white/50" : ""
-                            }`}
-                          >
-                            <div className="flex justify-end min-h-[40px] items-center">
-                              <div className="text-md flex items-center justify-end gap-2">
-                                <button
-                                  onClick={() =>
-                                    handleDeleteLinkWithFade(link.chatId)
-                                  }
-                                >
-                                  <BiTrash className="w-5 h-5" />
-                                </button>
-                              </div>
-                            </div>
-                          </td>
+  const renderSharedLinksDialog = () => {
+    const sortedLinks = [...sharedLinks].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    return (
+      <Dialog
+        open={manageTab === "shared-link"}
+        onClose={() => setManageTab("")}
+      >
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-2xl">
+            <div className="flex justify-between items-center p-4 border-b dark:border-[hsla(0,0%,100%,.1)]">
+              <DialogTitle className="text-lg font-medium my-[.25rem] first:mt-[.25rem]">
+                Shared Links
+              </DialogTitle>
+              <HiOutlineXMark
+                className="w-5 h-5 cursor-pointer"
+                onClick={() => setManageTab("")}
+              />
+            </div>
+            <>
+              {sortedLinks.length > 0 ? (
+                <div className="flex-grow overflow-y-auto p-4 sm:p-6">
+                  <div className="overflow-y-auto hide-scrollbar text-sm h-80">
+                    <table className="w-full border-separate border-spacing-0">
+                      <thead>
+                        <tr>
+                          <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-0 text-left">
+                            Name
+                          </th>
+                          <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-0 text-left">
+                            Date shared
+                          </th>
+                          <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-4 last:border-r-0 text-right">
+                            <button>
+                              <BsThreeDots />
+                            </button>
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {sortedLinks.map((link, index) => (
+                          <tr key={link.chatId}>
+                            <td
+                              className={`border-x-0 border-t-0 border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
+                                deletedLink === link.chatId
+                                  ? "text-white/50"
+                                  : ""
+                              } ${
+                                index === sortedLinks.length - 1
+                                  ? "border-b-0"
+                                  : "border-b-[0.5px]"
+                              }`}
+                            >
+                              <div className="flex min-h-[40px] items-center">
+                                <Link
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className={`inline-flex items-center gap-2 align-top ${
+                                    deletedLink === link.chatId
+                                      ? "text-white/50"
+                                      : "text-blue-500 dark:text-blue-400"
+                                  } underline`}
+                                >
+                                  <RiLinkM className="w-5 h-5" />
+                                  {link.title}
+                                </Link>
+                              </div>
+                            </td>
+                            <td
+                              className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
+                                deletedLink === link.chatId
+                                  ? "text-white/50"
+                                  : ""
+                              } ${
+                                index === sortedLinks.length - 1
+                                  ? "border-b-0"
+                                  : "border-b-[0.5px]"
+                              }`}
+                            >
+                              <div className="flex min-h-[40px] items-center">
+                                {dayjs(link.createdAt).format("MMMM D, YYYY")}
+                              </div>
+                            </td>
+                            <td
+                              className={`border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.1)] align-top pr-4 text-right last:border-r-0 ${
+                                deletedLink === link.chatId
+                                  ? "text-white/50"
+                                  : ""
+                              } ${
+                                index === sortedLinks.length - 1
+                                  ? "border-b-0"
+                                  : "border-b-[0.5px]"
+                              }`}
+                            >
+                              <div className="flex justify-end min-h-[40px] items-center">
+                                <div className="text-md flex items-center justify-end gap-2">
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteLinkWithFade(link.chatId)
+                                    }
+                                  >
+                                    <BiTrash className="w-5 h-5" />
+                                  </button>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <p className="p-4 min-h-80">No shared links available.</p>
-            )}
-          </>
-        </DialogPanel>
-      </div>
-    </Dialog>
-  );
+              ) : (
+                <div className="p-4 text-sm h-80">
+                  No shared links available.
+                </div>
+              )}
+            </>
+          </DialogPanel>
+        </div>
+      </Dialog>
+    );
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -383,9 +421,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
                 className="flex justify-between items-center text-sm py-2.5 border-b border-[hsla(0,0%,100%,.1)] last:border-none first:pt-0"
               >
                 <span>{setting.label}</span>
-                <span className="text-black dark:text-white p-1">
-                  {setting.value}
-                </span>
+                <span className="p-1">{setting.value}</span>
                 {setting.control}
               </div>
             ))}
@@ -415,16 +451,16 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
 
   return (
     <>
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+      <Dialog open={isOpen} onClose={handleClose}>
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-xl min-h-96">
             <div className="flex justify-between items-center p-4 px-6 border-b dark:border-[#444]">
-              <DialogTitle className="text-lg font-medium">
+              <DialogTitle className="text-lg font-medium my-[.25rem] first:mt-[.25rem]">
                 Settings
               </DialogTitle>
               <div
                 className="cursor-pointer hover:bg-[#666] p-1 rounded-full"
-                onClick={() => setIsOpen(false)}
+                onClick={handleClose}
               >
                 <HiOutlineXMark className="w-5 h-5" />
               </div>

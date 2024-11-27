@@ -24,7 +24,7 @@ router.post("/share", protect, shareChat);
 router.get("/share/:shareId", getSharedChat);
 router.delete("/share/:shareId", protect, deleteSharedChat);
 router.get("/user/:userId", protect, getChatsByUserId);
-router.route("/:chatId").get(protect, getChatsById).delete(protect, deleteChat);
 router.delete("/all", protect, deleteAllChat);
+router.route("/:chatId").get(protect, getChatsById).delete(protect, deleteChat);
 
 export default router;

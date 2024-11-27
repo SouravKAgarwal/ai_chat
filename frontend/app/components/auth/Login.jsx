@@ -55,7 +55,7 @@ const Login = ({ login, setLogin, setRegister }) => {
         <Loading />
       ) : (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <DialogPanel className="relative bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+          <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] p-6 rounded-lg shadow-lg w-full max-w-md">
             <button
               type="button"
               className="absolute top-2 right-2 text-gray-800 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-200"
@@ -63,7 +63,7 @@ const Login = ({ login, setLogin, setRegister }) => {
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
-            <h2 className="text-2xl font-bold mb-6 font-Josefin text-black dark:text-white">
+            <h2 className="text-2xl font-bold mb-6 text-black dark:text-white">
               Log In
             </h2>
             <form onSubmit={handleSubmit}>

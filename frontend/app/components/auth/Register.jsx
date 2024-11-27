@@ -62,7 +62,7 @@ const Register = ({ registered, setLogin, setRegister }) => {
         <Loading />
       ) : (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <DialogPanel className="relative bg-white  dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+          <DialogPanel className="relative bg-white  dark:bg-[#2d2c2c] p-6 rounded-lg shadow-lg w-full max-w-md">
             <button
               type="button"
               className="absolute top-2 right-2 text-gray-800 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-200"

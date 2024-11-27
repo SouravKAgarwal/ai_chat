@@ -74,9 +74,12 @@ export const chatApi = apiSlice.injectEndpoints({
       }),
     }),
     deleteAllChats: builder.mutation({
-      query: () => ({
+      query: ({ userId }) => ({
         url: `chat/all`,
         method: "DELETE",
+        body: {
+          userId,
+        },
         credentials: "include",
       }),
     }),

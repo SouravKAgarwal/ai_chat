@@ -75,7 +75,7 @@ const ShareDialog = ({
                       <div className="flex justify-between items-center p-5 border-b border-[#666]">
                         <DialogTitle
                           as="h3"
-                          className="text-lg font-medium leading-6"
+                          className="text-lg font-medium my-[.25rem] first:mt-[.25rem]"
                         >
                           Public link created
                         </DialogTitle>
@@ -167,7 +167,7 @@ const ShareDialog = ({
                   ) : (
                     <>
                       <div className="flex justify-between items-center p-5 border-b border-[#666]">
-                        <DialogTitle className="text-lg font-medium">
+                        <DialogTitle className="text-lg font-medium my-[.25rem] first:mt-[.25rem]">
                           Share public link to chat
                         </DialogTitle>
                         <div

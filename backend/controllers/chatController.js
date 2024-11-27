@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import { generateChatResponse } from "../utils/index.js";
 import { v2 as cloudinary } from "cloudinary";
 import { v4 as uuidv4 } from "uuid";
+import { redis } from "../config/redis.js";
 
 export const createChat = catchAsyncError(async (req, res, next) => {
   const { userId, prompt, file, image } = req.body;
@@ -251,6 +252,7 @@ export const shareChat = catchAsyncError(async (req, res, next) => {
 
     user.sharedLinks.push(sharedLinkEntry);
     await user.save();
+    await redis.set(user._id.toString(), JSON.stringify(user));
 
     setTimeout(async () => {
       try {
@@ -356,6 +358,7 @@ export const deleteSharedChat = catchAsyncError(async (req, res, next) => {
       );
 
       await user.save();
+      await redis.set(user._id.toString(), JSON.stringify(user));
     }
 
     res.status(200).json({
@@ -369,19 +372,21 @@ export const deleteSharedChat = catchAsyncError(async (req, res, next) => {
 });
 
 export const deleteAllChat = catchAsyncError(async (req, res, next) => {
-  try {
-    const result = await Chat.deleteMany({ userId: req.user._id });
+  const userId = req.user?._id;
 
-    if (result.deletedCount === 0) {
-      return next(new ErrorHandler("No chats found to delete.", 404));
-    }
+  if (!userId) {
+    return next(new ErrorHandler("Unauthorized: User not found.", 401));
+  }
+
+  try {
+    const result = await Chat.deleteMany({ userId });
 
     res.status(200).json({
       success: true,
-      message: "All chats deleted successfully.",
+      message: `${result.deletedCount} chats deleted.`,
     });
   } catch (error) {
-    console.error("Error in deleting all chats:", error);
+    console.error("Error deleting user chats:", error);
     return next(new ErrorHandler("Failed to delete all chats.", 500));
   }
 });

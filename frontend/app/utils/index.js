@@ -42,30 +42,6 @@ export const handleTextToSpeech = (
   }
 };
 
-// const TypewriterText = ({ text, className }) => {
-//   const [displayedText, setDisplayedText] = useState("");
-
-//   useEffect(() => {
-//     let currentIndex = 0;
-//     const intervalId = setInterval(() => {
-//       setDisplayedText(text.substring(0, currentIndex + 1));
-//       currentIndex += 1;
-
-//       if (currentIndex >= text.length) {
-//         clearInterval(intervalId);
-//       }
-//     }, 10);
-
-//     return () => clearInterval(intervalId);
-//   }, [text]);
-
-//   return (
-//     <span className={className}>
-//       <Markdown>{displayedText}</Markdown>
-//     </span>
-//   );
-// };
-
 export const formatResponse = (
   text,
   index,

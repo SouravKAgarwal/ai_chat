@@ -87,12 +87,12 @@ const ChatWindow = ({
             }`}
           >
             {msg.sender === "ai" && (
-              <div className="mr-2 rounded-full hidden md:block mt-2">
+              <div className="mr-2 rounded-full hidden md:block mt-4 border border-[hsla(0,0%,100%,.5)]">
                 <Image
                   src="/logo_image.png"
                   height={1000}
                   width={1000}
-                  className="h-8 w-8 object-cover object-center"
+                  className="h-6 w-6 object-cover object-center"
                   alt="logo"
                 />
               </div>

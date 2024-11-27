@@ -25,6 +25,7 @@ import {
 } from "@/redux/features/chat/chatApi";
 import ShareDialog from "./chat/ShareDialog";
 import { useLoadUserQuery } from "@/redux/features/api/apiSlices";
+import Image from "next/image";
 
 const Sidebar = ({
   sidebarOpen,
@@ -222,7 +223,15 @@ const Sidebar = ({
                   onClick={handleLinkClick}
                   className="font-semibold flex gap-2 items-center hover:bg-[#1c1c1c] hover:rounded-lg p-2 -ml-2"
                 >
-                  <FaRainbow size={16} />
+                  <div className="rounded-full border border-[hsla(0,0%,100%,.5)]">
+                    <Image
+                      src="/logo_image.png"
+                      height={1000}
+                      width={1000}
+                      className="h-5 w-5 object-cover object-center"
+                      alt="logo"
+                    />
+                  </div>
                   MyGPT
                 </Link>
               </li>
