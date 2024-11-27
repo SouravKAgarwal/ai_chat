@@ -81,8 +81,6 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
   );
   const [voices, setVoices] = useState([]);
 
-  console.log(selectedVoice);
-
   const [deleteShareChat, { isSuccess }] = useDeleteShareChatMutation();
   const [deleteAllChats, { isSuccess: deleteAllChatSuccess }] =
     useDeleteAllChatsMutation();
@@ -129,10 +127,6 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       const availableVoices = speechSynthesis.getVoices();
       toast.success(availableVoices.length);
       setVoices(availableVoices);
-
-      if (availableVoices.length > 1 && !selectedVoice) {
-        setSelectedVoice(microsoftVoices[1]);
-      }
     };
 
     if (speechSynthesis.onvoiceschanged !== undefined) {
@@ -150,6 +144,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       const fullVoice = availableVoices.find(
         (voice) => voice.name === selectedVoice
       );
+      toast.success(fullVoice.lang);
       utterance.voice = fullVoice;
       speechSynthesis.speak(utterance);
     }
