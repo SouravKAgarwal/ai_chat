@@ -131,9 +131,11 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       setVoices(microsoftVoices);
     };
 
-    if (speechSynthesis.onvoiceschanged !== undefined) {
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = handleVoicesChanged;
     }
+
+    window.speechSynthesis.getVoices();
     handleVoicesChanged();
   }, []);
 
