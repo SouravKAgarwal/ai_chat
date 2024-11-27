@@ -12,7 +12,8 @@ import {
 import { HiOutlineXMark } from "react-icons/hi2";
 import { MdSettings, MdPerson, MdMic, MdSecurity } from "react-icons/md";
 import { IoMdBrush } from "react-icons/io";
-import { BsDatabaseFillGear, BsThreeDots } from "react-icons/bs";
+import { BsDatabaseFillGear, BsSoundwave, BsThreeDots } from "react-icons/bs";
+import { RiPlayCircleLine } from "react-icons/ri";
 import { useTheme } from "next-themes";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { RiLinkM } from "react-icons/ri";
@@ -74,6 +75,10 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
   const [manageTab, setManageTab] = useState("");
   const [deletedLink, setDeletedLink] = useState(null);
   const [openDeleteConf, setOpenDeleteConf] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState(
+    localStorage.getItem("selectedVoice") ?? null
+  );
+  const [voices, setVoices] = useState([]);
 
   const [deleteShareChat, { isSuccess }] = useDeleteShareChatMutation();
   const [deleteAllChats, { isSuccess: deleteAllChatSuccess }] =
@@ -111,7 +116,45 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       refetch();
       router.push("/");
     }
-  }, [isSuccess, deleteAllChatSuccess]);
+    if (selectedVoice) {
+      localStorage.setItem("selectedVoice", selectedVoice);
+    }
+  }, [isSuccess, deleteAllChatSuccess, selectedVoice]);
+
+  useEffect(() => {
+    const handleVoicesChanged = () => {
+      const availableVoices = speechSynthesis.getVoices();
+      const microsoftVoices = availableVoices
+        .filter((voice) => voice.name.includes("Microsoft"))
+        .map((voice) => voice.name.split(" ")[1]);
+
+      setVoices(microsoftVoices);
+
+      if (microsoftVoices.length > 1 && !selectedVoice) {
+        setSelectedVoice(microsoftVoices[1]);
+        localStorage.setItem("selectedVoice", microsoftVoices[1]);
+      }
+    };
+
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = handleVoicesChanged;
+    }
+    handleVoicesChanged();
+  }, []);
+
+  const handlePlay = () => {
+    if (selectedVoice) {
+      const utterance = new SpeechSynthesisUtterance(
+        "Hello, this is a test message."
+      );
+      const availableVoices = speechSynthesis.getVoices();
+      const fullVoice = availableVoices.find(
+        (voice) => voice.name.split(" ")[1] === selectedVoice
+      );
+      utterance.voice = fullVoice;
+      speechSynthesis.speak(utterance);
+    }
+  };
 
   const tabs = [
     { id: "general", label: "General", icon: <MdSettings /> },
@@ -122,7 +165,7 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       label: "Data controls",
       icon: <BsDatabaseFillGear />,
     },
-    { id: "speech", label: "Speech", icon: <MdMic /> },
+    { id: "speech", label: "Speech", icon: <BsSoundwave /> },
     { id: "security", label: "Security", icon: <MdSecurity /> },
   ];
 
@@ -265,6 +308,49 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
         <button className="text-[#ececec] border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2 bg-red-500 hover:bg-red-600">
           Delete
         </button>
+      ),
+    },
+  ];
+
+  const voiceSettings = [
+    {
+      label: "Voice",
+      control: (
+        <div className="flex items-center gap-3">
+          <button
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={handlePlay}
+          >
+            <RiPlayCircleLine className="w-5 h-5" />
+            <span className="relative block text-center text-sm outline-none bg-transparent">
+              Play
+            </span>
+          </button>
+          <span>|</span>
+          <div className="relative">
+            <Listbox value={selectedVoice} onChange={setSelectedVoice}>
+              <ListboxButton className="relative block w-full py-1.5 pr-8 pl-3 text-left text-sm text-black dark:text-white outline-none">
+                {selectedVoice || "Select a Voice"}
+                <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-black dark:text-white" />
+              </ListboxButton>
+              <ListboxOptions className="absolute z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out">
+                {voices.map((voice) => (
+                  <ListboxOption
+                    key={voice}
+                    value={voice}
+                    className={({ active, selected }) =>
+                      `flex w-20 cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
+                        active ? "bg-[#333] text-white" : "text-white"
+                      }`
+                    }
+                  >
+                    {({ selected }) => <span>{voice}</span>}
+                  </ListboxOption>
+                ))}
+              </ListboxOptions>
+            </Listbox>
+          </div>
+        </div>
       ),
     },
   ];
@@ -436,9 +522,26 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
                 className="flex justify-between items-center text-sm py-2.5 border-b border-[hsla(0,0%,100%,.1)] last:border-none first:pt-0"
               >
                 <span>{setting.label}</span>
-                <span className="text-black dark:text-white p-1">
-                  {setting.value}
-                </span>
+                <div>
+                  {setting.control}
+                  <span className="text-black dark:text-white p-1">
+                    {setting.value}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      case "speech":
+        return (
+          <div className="flex flex-col">
+            {voiceSettings.map((setting, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center text-sm py-2.5 border-b border-[hsla(0,0%,100%,.1)] last:border-none"
+              >
+                <span>{setting.label}</span>
+                <span className="p-1">{setting.value}</span>
                 {setting.control}
               </div>
             ))}

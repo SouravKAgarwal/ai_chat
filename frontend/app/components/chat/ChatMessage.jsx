@@ -94,17 +94,17 @@ const ChatMessage = ({
 
       {isPreviewOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+          className="fixed inset-0 m-auto max-h-[100dvh] z-50 flex items-center justify-center bg-black bg-opacity-75"
           onClick={closePreview}
         >
-          <div className="relative md:max-w-2xl w-full p-4">
+          <div className="relative md:max-w-2xl w-auto h-auto p-4">
             <img
               src={msg.image?.imageUrl || image}
-              className="w-full h-auto object-contain rounded-lg"
+              className="w-full h-full object-contain rounded-lg"
               alt="preview"
             />
             <button
-              className="absolute top-1 right-2 bg-[#666] rounded-full p-1"
+              className="absolute top-2 right-2 bg-[#666] rounded-full p-1"
               onClick={closePreview}
             >
               <HiOutlineXMark className="w-5 h-5" />

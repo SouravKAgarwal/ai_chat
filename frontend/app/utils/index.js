@@ -11,7 +11,6 @@ import { LuCopy, LuPencil } from "react-icons/lu";
 import { BsTranslate } from "react-icons/bs";
 import { RiQuillPenFill } from "react-icons/ri";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
-import { useEffect, useState } from "react";
 
 export const handleTextToSpeech = (
   text,
@@ -19,7 +18,18 @@ export const handleTextToSpeech = (
   conversation,
   setConversation
 ) => {
+  const selectedVoiceName = localStorage.getItem("selectedVoice");
+  const availableVoices = speechSynthesis.getVoices();
+  const selectedVoice = availableVoices.find(
+    (voice) => voice.name.split(" ")[1] === selectedVoiceName
+  );
+
   const utterance = new SpeechSynthesisUtterance(removeMarkdown(text));
+
+  if (selectedVoice) {
+    utterance.voice = selectedVoice;
+  }
+
   const newConversation = conversation.map((msg, idx) => {
     if (idx === index) {
       return { ...msg, mute: !msg.mute };
