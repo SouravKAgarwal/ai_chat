@@ -49,12 +49,12 @@ const ChatMessage = ({
         className={`${
           msg.sender === "human"
             ? "items-end max-w-xl text-white bg-zinc-700 dark:bg-[#2f2f2f] text-sm rounded-t-2xl rounded-bl-2xl p-3"
-            : "self-start text-sm rounded-t-2xl rounded-br-2xl p-2"
+            : "w-full max-w-[40rem] md:max-w-[43rem] lg:max-w-[46rem] self-start text-sm rounded-t-2xl rounded-br-2xl p-2"
         }`}
       >
         {msg.sender === "ai" ? (
           loading && msg.message === "" ? (
-            <div className="loading-dots">
+            <div className="loading-dots mt-2">
               <div className="dot"></div>
               <div className="dot"></div>
               <div className="dot"></div>

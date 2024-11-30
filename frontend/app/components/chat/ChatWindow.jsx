@@ -83,16 +83,16 @@ const ChatWindow = ({
             className={`flex ${
               msg.sender === "human"
                 ? "self-end"
-                : "items-start ml-0 md:-ml-14 py-3"
+                : "items-start ml-0 md:-ml-14 px-0 md:px-6 py-3"
             }`}
           >
             {msg.sender === "ai" && (
-              <div className="mr-2 rounded-full hidden md:block mt-4 border border-[hsla(0,0%,100%,.5)]">
+              <div className="mr-2 hidden md:block mt-2">
                 <Image
                   src="/logo_image.png"
                   height={1000}
                   width={1000}
-                  className="h-6 w-6 object-cover object-center"
+                  className="h-6 w-6 object-cover object-center border border-[hsla(0,0%,100%,.5)] rounded-full max-w-fit"
                   alt="logo"
                 />
               </div>

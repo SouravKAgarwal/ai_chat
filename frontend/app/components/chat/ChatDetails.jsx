@@ -82,8 +82,9 @@ const ChatDetails = ({ chatId }) => {
         handleDelete={handleDelete}
       />
       <div
-        className={`transition-all duration-300 flex-1 flex flex-col ${
-          sidebarOpen && "ml-0 sm:ml-48 md:ml-64"
+        className={`w-full transition-all duration-300 flex-1 flex flex-col ${
+          sidebarOpen &&
+          "ml-0 sm:ml-48 md:ml-64 sm:w-[calc(100vw-192px)] md:w-[calc(100vw-320px)]"
         }`}
       >
         <Navbar

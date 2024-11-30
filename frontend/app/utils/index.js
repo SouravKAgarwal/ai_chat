@@ -92,7 +92,7 @@ export const formatResponse = (
     parts.push(
       <div
         key={match.index}
-        className="relative text-sm bg-black text-[#b4b4b4] rounded-md mb-4 w-full"
+        className="relative text-sm bg-black text-[#b4b4b4] rounded-md mb-4"
       >
         {language && (
           <div className="flex justify-between items-center bg-[#393838] text-[#ccc] p-3 px-4 rounded-t-md">

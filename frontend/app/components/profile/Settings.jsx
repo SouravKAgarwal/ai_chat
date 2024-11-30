@@ -10,7 +10,7 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import { HiOutlineXMark } from "react-icons/hi2";
-import { MdSettings, MdPerson, MdMic, MdSecurity } from "react-icons/md";
+import { MdSettings, MdPerson, MdSecurity } from "react-icons/md";
 import { IoMdBrush } from "react-icons/io";
 import { BsDatabaseFillGear, BsSoundwave, BsThreeDots } from "react-icons/bs";
 import { RiPlayCircleLine } from "react-icons/ri";
@@ -25,7 +25,6 @@ import {
   useDeleteShareChatMutation,
 } from "@/redux/features/chat/chatApi";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
   return (

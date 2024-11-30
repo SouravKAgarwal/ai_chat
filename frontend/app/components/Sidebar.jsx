@@ -188,7 +188,7 @@ const Sidebar = ({
 
   return (
     <div
-      className={`fixed h-full transition-all duration-300 ease-in-out text-[#bbb] px-4 py-2 z-50 flex flex-col flex-shrink-0 ${
+      className={`fixed h-full transition-all duration-300 ease-in-out text-[#bbb] px-4 py-2 z-40 flex flex-col flex-shrink-0 ${
         sidebarOpen ? "w-full sm:w-48 md:w-64 bg-[#121212]" : ""
       }`}
     >
