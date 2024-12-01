@@ -80,7 +80,7 @@ export const formatResponse = (
   while ((match = codeBlockRegex.exec(mainPart)) !== null) {
     if (match.index > lastIndex) {
       parts.push(
-        <span className="leading-7" key={lastIndex}>
+        <span className="leading-7 text-[15px]" key={lastIndex}>
           <Markdown>{mainPart.slice(lastIndex, match.index)}</Markdown>
         </span>
       );
