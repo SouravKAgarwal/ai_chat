@@ -25,27 +25,14 @@ const messageSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    usageMetaData: {
-      promptTokenCount: { type: Number },
-      candidatesTokenCount: { type: Number },
-      totalTokenCount: { type: Number },
-    },
-    image: imageInfo,
     refreshedResponses: [
       {
-        message: { type: String, required: true },
-        refreshedResponses: [
-          {
-            message: { type: String, required: true },
-            usageMetaData: {
-              promptTokenCount: { type: Number },
-              candidatesTokenCount: { type: Number },
-              totalTokenCount: { type: Number },
-            },
-          },
-        ],
+        message: {
+          type: String,
+        },
       },
     ],
+    image: imageInfo,
   },
   { timestamps: true }
 );
@@ -59,6 +46,11 @@ const chatSchema = new mongoose.Schema(
     },
     title: { type: String, required: true },
     conversation: [messageSchema],
+    usageMetadata: {
+      promptTokenCount: { type: Number },
+      candidatesTokenCount: { type: Number },
+      totalTokenCount: { type: Number },
+    },
     shareUuid: { type: String, unique: true, sparse: true },
   },
   { timestamps: true }

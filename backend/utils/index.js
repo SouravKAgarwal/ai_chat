@@ -91,7 +91,7 @@ export const generateChatResponse = async (
     const usageMetadata = responseResult.response.usageMetadata;
 
     if (conversation.length === 0) {
-      const titlePrompt = `Generate a short, clear, and accurate title based on the main topic of this prompt: "${prompt}".`;
+      const titlePrompt = `Generate a short, clear, and accurate title based on the main topic of this prompt: "${prompt} aiResponse:${aiResponse}".`;
       const titleResult = await model.generateContent([titlePrompt]);
       title = titleResult.response.text();
     }

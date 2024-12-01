@@ -65,6 +65,9 @@ const NewChat = ({ user }) => {
     const newMessage = { sender: "human", message: input, image };
     setConversation((prevConversation) => [...prevConversation, newMessage]);
 
+    const aiPlaceholderMessage = { sender: "ai", message: "" };
+    setConversation((prev) => [...prev, aiPlaceholderMessage]);
+
     const chatData = {
       userId: user._id,
       prompt: input.trimEnd(),
@@ -76,20 +79,22 @@ const NewChat = ({ user }) => {
       setLoading(true);
       const createdChat = await createChat(chatData).unwrap();
       setTitle(createdChat?.chat?.title);
-      const aiMessage = createdChat.chat.conversation.slice(-1)[0];
-
-      setConversation((prevConversation) => {
-        const updatedConversation = [...prevConversation];
-        const lastAiMessageIndex = updatedConversation.length - 1;
-        updatedConversation[lastAiMessageIndex] = aiMessage;
-
+      setConversation((prev) => {
+        const updatedConversation = [...prev];
+        const aiMessageIndex = updatedConversation.findIndex(
+          (msg) => msg.sender === "ai" && msg.message === ""
+        );
+        if (aiMessageIndex !== -1) {
+          updatedConversation[aiMessageIndex].message =
+            createdChat.chat.conversation.slice(-1)[0].message;
+        }
         return updatedConversation;
       });
 
       setRedirectUrl(`/chat/${createdChat?.chat?._id}`);
     } catch (error) {
       console.error(error);
-      toast.error(error.message);
+      toast.error(error.data.message);
     } finally {
       setInput("");
       setImage(null);

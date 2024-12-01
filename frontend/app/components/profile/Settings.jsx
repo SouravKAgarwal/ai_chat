@@ -25,6 +25,10 @@ import {
   useDeleteShareChatMutation,
 } from "@/redux/features/chat/chatApi";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { AiOutlineCamera } from "react-icons/ai";
+import { useUpdateAvatarMutation } from "@/redux/features/user/userApi";
+import { toast } from "sonner";
 
 const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
   return (
@@ -83,6 +87,10 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
   const [deleteShareChat, { isSuccess }] = useDeleteShareChatMutation();
   const [deleteAllChats, { isSuccess: deleteAllChatSuccess }] =
     useDeleteAllChatsMutation();
+  const [
+    updateAvatar,
+    { isSuccess: editSuccess, error: editError, isLoading },
+  ] = useUpdateAvatarMutation();
 
   const sharedLinks = user?.sharedLinks || [];
   const router = useRouter();
@@ -148,6 +156,28 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       speechSynthesis.speak(utterance);
     }
   };
+
+  const imageHandler = (e) => {
+    const file = new FileReader();
+
+    file.onload = () => {
+      const avatar = file.result;
+      if (file.readyState === 2) {
+        updateAvatar(avatar);
+      }
+    };
+    file.readAsDataURL(e.target.files[0]);
+  };
+
+  useEffect(() => {
+    if (editSuccess) {
+      refetch();
+      toast.success("Profile updated successfully");
+    }
+    if (editError) {
+      toast.error(editError.data.message);
+    }
+  }, [editSuccess, editError]);
 
   const tabs = [
     { id: "general", label: "General", icon: <MdSettings /> },
@@ -257,6 +287,48 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
   ];
 
   const profileSettings = [
+    {
+      label: "Avatar",
+      control: (
+        <div className="flex items-center justify-center overflow-hidden rounded-full">
+          <div className="relative flex">
+            {isLoading ? (
+              <div className="w-5 h-5 border-2 border-t-transparent border-slate-500 rounded-full animate-spin"></div>
+            ) : user?.profileImage ? (
+              <Image
+                width={3200}
+                height={3200}
+                src={user?.profileImage?.url}
+                alt={user?.username}
+                className="w-8 h-8 rounded-sm"
+              />
+            ) : (
+              <Image
+                width={32}
+                height={32}
+                src={"/profile.png"}
+                alt={user?.username}
+                className="rounded-sm"
+              />
+            )}
+          </div>
+          <input
+            id="avatar"
+            type="file"
+            className="hidden"
+            onChange={imageHandler}
+            accept="image/png, image/jpg,image/jpeg,image/webp"
+          />
+          {!isLoading && (
+            <label htmlFor="avatar">
+              <div className="w-5 h-5 bg-slate-900 rounded-full mt-1 absolute right-3 flex items-center justify-center cursor-pointer">
+                <AiOutlineCamera size={16} className="z-1 text-white" />
+              </div>
+            </label>
+          )}
+        </div>
+      ),
+    },
     { label: "Username", value: user?.username },
     { label: "Email", value: user?.email },
     {

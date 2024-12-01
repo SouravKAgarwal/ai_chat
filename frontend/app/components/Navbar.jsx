@@ -103,13 +103,23 @@ const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
             <button className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[#2f2f2f] focus-visible:bg-[#2f2f2f] focus-visible:outline-0">
               <div className="flex items-center justify-center overflow-hidden rounded-full">
                 <div className="relative flex" onClick={() => setIsOpen(true)}>
-                  <Image
-                    width={32}
-                    height={32}
-                    src={user?.profileImage?.url}
-                    alt={user?.username}
-                    className="rounded-sm"
-                  />
+                  {user?.profileImage ? (
+                    <Image
+                      width={32}
+                      height={32}
+                      src={user?.profileImage?.url}
+                      alt={user?.username}
+                      className="rounded-sm"
+                    />
+                  ) : (
+                    <Image
+                      width={32}
+                      height={32}
+                      src={"/profile.png"}
+                      alt={user?.username}
+                      className="rounded-sm"
+                    />
+                  )}
                 </div>
               </div>
             </button>

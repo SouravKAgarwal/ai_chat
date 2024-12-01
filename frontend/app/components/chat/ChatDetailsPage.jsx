@@ -34,8 +34,7 @@ const ChatDetailsPage = ({ chatId, setTitle }) => {
     if (!input.trim()) return;
 
     const newMessage = { sender: "human", message: input, image };
-    const newConversation = [...conversation, newMessage];
-    setConversation(newConversation);
+    setConversation((prevConversation) => [...prevConversation, newMessage]);
 
     const aiPlaceholderMessage = { sender: "ai", message: "" };
     setConversation((prev) => [...prev, aiPlaceholderMessage]);

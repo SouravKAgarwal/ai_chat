@@ -63,7 +63,7 @@ export const formatResponse = (
   handlePrev,
   handleNext
 ) => {
-  const explanationRegex = /()Explanation:(.*)/s;
+  const explanationRegex = /(Explanation|Medium Explanation):(.*)/s;
   const explanationMatch = text.match(explanationRegex);
   const explanation = explanationMatch ? explanationMatch[2].trim() : null;
 

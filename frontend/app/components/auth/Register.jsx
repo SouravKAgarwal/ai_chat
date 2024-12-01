@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import Loading from "../Loading";
 
 const schema = Yup.object().shape({
-  username: Yup.string().required("Please enter your name!"),
+  username: Yup.string().required("Please enter your username!"),
   email: Yup.string()
     .email("Invalid email!")
     .required("Please enter your email!"),

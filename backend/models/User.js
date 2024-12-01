@@ -33,8 +33,9 @@ const userSchema = new mongoose.Schema(
       validUntil: { type: Date },
     },
 
-    apiUsage: {
-      requestsMade: { type: Number, default: 0 },
+    tokenUsed: {
+      totalTokens: { type: Number, default: 0 },
+      limitTokens: { type: Number, default: 50000 },
       limitReached: { type: Boolean, default: false },
     },
 

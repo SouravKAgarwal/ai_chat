@@ -20,6 +20,7 @@ export const createChat = catchAsyncError(async (req, res, next) => {
 
   try {
     let imageUrl = null;
+    let fileData = null;
 
     if (image) {
       const uploadResult = await cloudinary.uploader.upload(image, {
@@ -28,34 +29,56 @@ export const createChat = catchAsyncError(async (req, res, next) => {
       imageUrl = uploadResult.secure_url;
     }
 
-    const aiResponse = await generateChatResponse(prompt, null, file);
-
-    if (aiResponse.error) {
-      return next(new ErrorHandler(aiResponse.error, 500));
+    if (file) {
+      fileData = {
+        destination: file.destination,
+        encoding: file.encoding,
+        fieldname: file.fieldname,
+        filename: file.filename,
+        mimetype: file.mimetype,
+        originalname: file.originalname,
+        path: file.path,
+        size: file.size,
+      };
     }
 
-    const imageInfo = {
-      imageUrl,
-      fileData: file,
-    };
+    const { response, title, usageMetadata, error } =
+      await generateChatResponse(prompt, null, file);
+
+    if (error) {
+      return next(new ErrorHandler(error, 500));
+    }
+
+    const imageInfo = image || file ? { imageUrl, fileData } : null;
 
     const conversation = [
-      { sender: "human", message: prompt, image: image && imageInfo },
+      { sender: "human", message: prompt, image: imageInfo },
       {
         sender: "ai",
-        message: aiResponse.response.text,
-        usageMetaData: aiResponse.usageMetadata,
+        message: response.text,
+        refreshedResponses: [],
       },
     ];
 
-    const title = aiResponse.title.text;
     const chat = new Chat({
       userId,
-      title: title.trimEnd(),
+      title: title.text.trimEnd(),
       conversation,
+      usageMetadata,
+      shareUuid: uuidv4(),
     });
 
     await chat.save();
+
+    const user = await User.findById(userId);
+
+    user.tokenUsed.totalTokens += chat.usageMetadata.totalTokenCount;
+
+    if (user.tokenUsed.totalTokens >= user.tokenUsed.limitTokens) {
+      user.tokenUsed.limitReached = true;
+    }
+
+    await user.save();
 
     res.status(201).json({ success: true, chat });
   } catch (error) {
@@ -77,11 +100,19 @@ export const updateChat = catchAsyncError(async (req, res, next) => {
 
   try {
     let chat = await Chat.findById(chatId);
+
     if (!chat) {
       return next(new ErrorHandler("Chat not found.", 404));
     }
 
+    const user = await User.findById(chat.userId);
+
+    if (!user) {
+      return next(new ErrorHandler("User not found.", 404));
+    }
+
     let imageUrl = null;
+    let fileData = null;
 
     if (image) {
       const uploadResult = await cloudinary.uploader.upload(image, {
@@ -90,37 +121,72 @@ export const updateChat = catchAsyncError(async (req, res, next) => {
       imageUrl = uploadResult.secure_url;
     }
 
-    const aiResponse = await generateChatResponse(
+    if (file) {
+      fileData = {
+        destination: file.destination,
+        encoding: file.encoding,
+        fieldname: file.fieldname,
+        filename: file.filename,
+        mimetype: file.mimetype,
+        originalname: file.originalname,
+        path: file.path,
+        size: file.size,
+      };
+    }
+
+    const { response, usageMetadata, error } = await generateChatResponse(
       prompt,
       null,
       file,
       chat.conversation
     );
 
-    if (aiResponse.error) {
-      return next(new ErrorHandler(aiResponse.error, 500));
+    if (error) {
+      return next(new ErrorHandler(error, 500));
     }
 
     const humanMessage = {
       sender: "human",
       message: prompt,
-      image: image
-        ? {
-            imageUrl,
-            fileData: file,
-          }
-        : undefined,
+      image:
+        image || file
+          ? {
+              imageUrl,
+              fileData,
+            }
+          : null,
     };
 
     const aiMessage = {
       sender: "ai",
-      message: aiResponse.response.text,
-      usageMetaData: aiResponse.usageMetadata,
+      message: response.text,
+      refreshedResponses: [],
     };
 
     chat.conversation.push(humanMessage, aiMessage);
 
+    const newPromptTokens = usageMetadata?.promptTokenCount || 0;
+    const newCandidateTokens = usageMetadata?.candidatesTokenCount || 0;
+    const newTotalTokens = usageMetadata?.totalTokenCount || 0;
+
+    chat.usageMetadata.promptTokenCount =
+      (chat.usageMetadata.promptTokenCount || 0) + newPromptTokens;
+
+    chat.usageMetadata.candidatesTokenCount =
+      (chat.usageMetadata.candidatesTokenCount || 0) + newCandidateTokens;
+
+    chat.usageMetadata.totalTokenCount =
+      (chat.usageMetadata.totalTokenCount || 0) + newTotalTokens;
+
     await chat.save();
+
+    user.tokenUsed.totalTokens += chat.usageMetadata.totalTokenCount;
+
+    if (user.tokenUsed.totalTokens >= user.tokenUsed.limitTokens) {
+      user.tokenUsed.limitReached = true;
+    }
+
+    await user.save();
 
     res.status(200).json({ success: true, chat });
   } catch (error) {
@@ -132,23 +198,40 @@ export const updateChat = catchAsyncError(async (req, res, next) => {
 export const refreshChatResponse = catchAsyncError(async (req, res, next) => {
   const { chatId, messageIndex } = req.body;
 
+  if (!chatId || messageIndex === undefined) {
+    return next(
+      new ErrorHandler("Chat ID and message index are required.", 400)
+    );
+  }
+
   try {
     const chat = await Chat.findById(chatId);
-    if (!chat) return next(new ErrorHandler("Chat not found.", 404));
+    if (!chat) {
+      return next(new ErrorHandler("Chat not found.", 404));
+    }
 
     const conversationEntry = chat.conversation[messageIndex];
     if (!conversationEntry || conversationEntry.sender !== "ai") {
       return next(new ErrorHandler("Invalid AI message to refresh.", 404));
     }
 
-    const prompt = chat.conversation[messageIndex - 1].message;
+    const previousEntry = chat.conversation[messageIndex - 1];
+    if (!previousEntry || previousEntry.sender !== "human") {
+      return next(
+        new ErrorHandler(
+          "Cannot refresh: Missing or invalid preceding human message.",
+          400
+        )
+      );
+    }
+
+    const prompt = previousEntry.message;
 
     const { response, usageMetadata, error } = await generateChatResponse(
       prompt,
       null,
-      conversationEntry.image && conversationEntry.image.fileData,
-      chat.conversation,
-      "medium"
+      conversationEntry.image?.fileData,
+      chat.conversation
     );
 
     if (error) {
@@ -157,18 +240,43 @@ export const refreshChatResponse = catchAsyncError(async (req, res, next) => {
 
     const refreshedMessage = {
       message: response.text,
-      usageMetaData: usageMetadata,
     };
 
     conversationEntry.refreshedResponses =
       conversationEntry.refreshedResponses || [];
     conversationEntry.refreshedResponses.push(refreshedMessage);
 
+    chat.usageMetadata = {
+      promptTokenCount:
+        (chat.usageMetadata.promptTokenCount || 0) +
+        (usageMetadata?.promptTokenCount || 0),
+      candidatesTokenCount:
+        (chat.usageMetadata.candidatesTokenCount || 0) +
+        (usageMetadata?.candidatesTokenCount || 0),
+      totalTokenCount:
+        (chat.usageMetadata.totalTokenCount || 0) +
+        (usageMetadata?.totalTokenCount || 0),
+    };
+
     await chat.save();
 
-    res.status(200).json({ success: true, refreshedResponse: response.text });
+    const user = await User.findById(chat.userId);
+
+    user.tokenUsed.totalTokens += chat.usageMetadata.totalTokenCount;
+
+    if (user.tokenUsed.totalTokens > user.tokenUsed.limitTokens) {
+      user.tokenUsed.limitReached = true;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      refreshedResponse: response.text,
+    });
   } catch (error) {
-    return next(new ErrorHandler(error.message, 500));
+    console.error("Error in refreshing chat response:", error);
+    return next(new ErrorHandler("Failed to refresh chat response.", 500));
   }
 });
 

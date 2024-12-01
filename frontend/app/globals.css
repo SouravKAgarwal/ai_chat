@@ -118,11 +118,11 @@ blockquote > p:before {
 }
 
 ul {
-  @apply list-disc pl-4 pb-2 font-semibold;
+  @apply list-disc pl-4 pb-2;
 }
 
 ol {
-  @apply list-decimal pl-4 pb-2 font-semibold;
+  @apply list-decimal pl-4 pb-2;
 }
 
 h2 {

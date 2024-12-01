@@ -15,7 +15,7 @@ const CodeSandbox = ({ code }) => {
     >
       <SandpackLayout>
         <SandpackCodeEditor
-          className="w-full text-xs"
+          className="w-full text-[13px]"
           style={{
             height: "auto",
             maxWidth: "85vw",

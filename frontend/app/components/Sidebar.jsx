@@ -127,6 +127,8 @@ const Sidebar = ({
               <Link
                 href={`/chat/${chat._id}`}
                 onClick={handleLinkClick}
+                title={removeMarkdown(chat.title).trimEnd()}
+                aria-label={removeMarkdown(chat.title).trimEnd()}
                 className="overflow-hidden text-ellipsis whitespace-nowrap flex-grow pr-2"
               >
                 {removeMarkdown(chat.title).trimEnd()}
@@ -262,20 +264,36 @@ const Sidebar = ({
         <div className="mt-auto">
           <hr className="border-gray-600 mb-2" />
           {user ? (
-            <div
+            <button
+              className="flex items-center justify-center focus-visible:outline-0 gap-2 my-3"
               onClick={() => setIsOpen(true)}
-              className="flex cursor-pointer items-center space-x-2 py-2"
             >
-              <img
-                src={user?.profileImage && user?.profileImage.url}
-                alt="Profile"
-                className="w-9 h-9 rounded-full"
-              />
+              <div className="w-10 h-10 flex items-center justify-center overflow-hidden rounded-full  hover:bg-[#2f2f2f] focus-visible:bg-[#2f2f2f]">
+                <div className="relative flex">
+                  {user?.profileImage ? (
+                    <Image
+                      width={32}
+                      height={32}
+                      src={user?.profileImage?.url}
+                      alt={user?.username}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <Image
+                      width={32}
+                      height={32}
+                      src={"/profile.png"}
+                      alt={user?.username}
+                      className="rounded-full"
+                    />
+                  )}
+                </div>
+              </div>
               <div className="flex flex-col items-start">
                 <span className="text-sm">{user.username}</span>
                 <span className="text-xs text-[#aaa]">{user.email}</span>
               </div>
-            </div>
+            </button>
           ) : (
             <button className="p-3">
               <div
