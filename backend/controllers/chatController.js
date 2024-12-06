@@ -8,7 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { redis } from "../config/redis.js";
 
 export const createChat = catchAsyncError(async (req, res, next) => {
-  const { userId, prompt, file, image } = req.body;
+  const userId = req.user._id;
+  const { prompt, file, image } = req.body;
 
   if (!userId) {
     return next(new ErrorHandler("User login required.", 400));
@@ -24,7 +25,7 @@ export const createChat = catchAsyncError(async (req, res, next) => {
 
     if (image) {
       const uploadResult = await cloudinary.uploader.upload(image, {
-        folder: "chat_images",
+        folder: `${userId}`,
       });
       imageUrl = uploadResult.secure_url;
     }
@@ -116,7 +117,7 @@ export const updateChat = catchAsyncError(async (req, res, next) => {
 
     if (image) {
       const uploadResult = await cloudinary.uploader.upload(image, {
-        folder: "chat_images",
+        folder: `${user._id}`,
       });
       imageUrl = uploadResult.secure_url;
     }
@@ -281,7 +282,7 @@ export const refreshChatResponse = catchAsyncError(async (req, res, next) => {
 });
 
 export const getChatsByUserId = catchAsyncError(async (req, res, next) => {
-  const { userId } = req.params;
+  const userId = req.user._id;
 
   if (!userId) {
     return next(new ErrorHandler("User ID is required.", 400));
@@ -324,7 +325,8 @@ export const deleteChat = catchAsyncError(async (req, res, next) => {
 });
 
 export const shareChat = catchAsyncError(async (req, res, next) => {
-  const { chatId, userId } = req.body;
+  const { chatId } = req.body;
+  const userId = req.user._id;
 
   if (!chatId) {
     return next(new ErrorHandler("Chat ID is required.", 400));
@@ -496,5 +498,112 @@ export const deleteAllChat = catchAsyncError(async (req, res, next) => {
   } catch (error) {
     console.error("Error deleting user chats:", error);
     return next(new ErrorHandler("Failed to delete all chats.", 500));
+  }
+});
+
+export const archiveChat = catchAsyncError(async (req, res, next) => {
+  const userId = req.user?._id;
+  const { chatId } = req.body;
+
+  if (!userId) {
+    return next(new ErrorHandler("Unauthorized: User not found.", 401));
+  }
+
+  try {
+    let result;
+    if (chatId) {
+      result = await Chat.findOneAndUpdate(
+        { _id: chatId, userId },
+        { isArchived: true },
+        { new: true }
+      );
+
+      if (!result) {
+        return next(new ErrorHandler("Chat not found.", 404));
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Chat archived successfully.",
+        chat: result,
+      });
+    } else {
+      result = await Chat.updateMany(
+        { userId, isArchived: false },
+        { isArchived: true }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `${result.modifiedCount} chats archived.`,
+      });
+    }
+  } catch (error) {
+    console.error("Error archiving chats:", error.message);
+    return next(new ErrorHandler("Failed to archive chats.", 500));
+  }
+});
+
+export const unArchiveChat = catchAsyncError(async (req, res, next) => {
+  const userId = req.user?._id;
+  const { chatId } = req.body;
+
+  if (!userId) {
+    return next(new ErrorHandler("Unauthorized: User not found.", 401));
+  }
+
+  try {
+    let result;
+    if (chatId) {
+      result = await Chat.findOneAndUpdate(
+        { _id: chatId, userId },
+        { isArchived: false },
+        { new: true }
+      );
+
+      if (!result) {
+        return next(new ErrorHandler("Chat not found.", 404));
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Chat unarchived successfully.",
+        chat: result,
+      });
+    } else {
+      result = await Chat.updateMany(
+        { userId, isArchived: true },
+        { isArchived: false }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `${result.modifiedCount} chats unarchived.`,
+      });
+    }
+  } catch (error) {
+    console.error("Error unarchiving chats:", error.message);
+    return next(new ErrorHandler("Failed to unarchive chats.", 500));
+  }
+});
+
+export const getArchivedChats = catchAsyncError(async (req, res, next) => {
+  const userId = req.user?._id;
+
+  if (!userId) {
+    return next(new ErrorHandler("Unauthorized: User not found.", 401));
+  }
+
+  try {
+    const archivedChats = await Chat.find({ userId, isArchived: true });
+
+    res.status(200).json({
+      success: true,
+      message: `${archivedChats.length} archived chats retrieved.`,
+      archivedChats,
+    });
+  } catch (error) {
+    console.error("Error retrieving archived chats:", error.message);
+    return next(new ErrorHandler("Failed to retrieve archived chats.", 500));
   }
 });

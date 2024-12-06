@@ -82,6 +82,7 @@ const ChatMessage = ({
                   onClick={onImageClick}
                   width={1000}
                   height={1000}
+                  priority
                 />
               </div>
             )}

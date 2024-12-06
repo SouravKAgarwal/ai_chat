@@ -12,17 +12,24 @@ import {
 import { HiOutlineXMark } from "react-icons/hi2";
 import { MdSettings, MdPerson, MdSecurity } from "react-icons/md";
 import { IoMdBrush } from "react-icons/io";
-import { BsDatabaseFillGear, BsSoundwave, BsThreeDots } from "react-icons/bs";
-import { RiPlayCircleLine } from "react-icons/ri";
+import {
+  BsChat,
+  BsDatabaseFillGear,
+  BsSoundwave,
+  BsThreeDots,
+} from "react-icons/bs";
 import { useTheme } from "next-themes";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { RiLinkM } from "react-icons/ri";
+import { RiInboxUnarchiveLine, RiLinkM } from "react-icons/ri";
 import { BiTrash } from "react-icons/bi";
 import dayjs from "dayjs";
 import Link from "next/link";
 import {
+  useArchiveChatMutation,
   useDeleteAllChatsMutation,
   useDeleteShareChatMutation,
+  useGetArchivedChatsQuery,
+  useUnArchiveChatMutation,
 } from "@/redux/features/chat/chatApi";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -30,14 +37,14 @@ import { AiOutlineCamera } from "react-icons/ai";
 import { useUpdateAvatarMutation } from "@/redux/features/user/userApi";
 import { toast } from "sonner";
 
-const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
+const Confirmation = ({ action, isOpen, onClose, onConfirm }) => {
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
         <DialogPanel className="bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-md">
           <div className="flex justify-between items-center p-4 px-6 border-b dark:border-[#444]">
             <DialogTitle className="text-lg font-medium my-[.25rem] first:mt-[.25rem]">
-              Confirm Delete
+              Confirm {action.charAt(0).toUpperCase() + action.slice(1)}
             </DialogTitle>
             <div
               className="cursor-pointer hover:bg-[#666] p-1 rounded-full"
@@ -48,7 +55,7 @@ const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
           </div>
           <div className="p-4">
             <Description className="text-sm ">
-              Are you sure you want to delete all chats? This action cannot be
+              Are you sure you want to {action} all chats? This action cannot be
               undone.
             </Description>
             <div className="mt-4 flex justify-end gap-4">
@@ -72,17 +79,23 @@ const DeleteConfirmation = ({ isOpen, onClose, onConfirm }) => {
   );
 };
 
-const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
+const SettingsModal = ({
+  isOpen,
+  setIsOpen,
+  user,
+  setUserLogout,
+  refetch,
+  refetchChats,
+}) => {
   const { theme, setTheme } = useTheme();
   const [language, setLanguage] = useState("en");
   const [activeTab, setActiveTab] = useState("general");
   const [manageTab, setManageTab] = useState("");
+  const [action, setAction] = useState("");
   const [deletedLink, setDeletedLink] = useState(null);
-  const [openDeleteConf, setOpenDeleteConf] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState(
-    localStorage.getItem("selectedVoice") ?? null
-  );
-  const [voices, setVoices] = useState([]);
+  const [unarchive, setUnarchive] = useState(null);
+  const [openConf, setOpenConf] = useState(false);
+  const [archivedChats, setArchivedChats] = useState([]);
 
   const [deleteShareChat, { isSuccess }] = useDeleteShareChatMutation();
   const [deleteAllChats, { isSuccess: deleteAllChatSuccess }] =
@@ -91,6 +104,13 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     updateAvatar,
     { isSuccess: editSuccess, error: editError, isLoading },
   ] = useUpdateAvatarMutation();
+  const { data, refetch: refetchArchivedChats } = useGetArchivedChatsQuery(
+    {},
+    { refetchOnMountOrArgChange: true }
+  );
+  const [unArchiveChat, { isSuccess: unArchiveSuccess }] =
+    useUnArchiveChatMutation();
+  const [archiveChat, { isSuccess: archiveSuccess }] = useArchiveChatMutation();
 
   const sharedLinks = user?.sharedLinks || [];
   const router = useRouter();
@@ -113,7 +133,15 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     }, 200);
   };
 
-  const delAllChats = async () => await deleteAllChats({ userId: user?._id });
+  const handleUnarchiveWithFade = (chatId) => {
+    setUnarchive(chatId);
+    setTimeout(async () => {
+      await unArchiveChat(chatId);
+    }, 200);
+  };
+
+  const delAllChats = async () => await deleteAllChats();
+  const archiveAllChats = async () => await archiveChat();
 
   useEffect(() => {
     if (isSuccess) {
@@ -124,38 +152,22 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       refetch();
       router.push("/");
     }
-    if (selectedVoice) {
-      localStorage.setItem("selectedVoice", selectedVoice);
+    if (unArchiveSuccess) {
+      refetchChats();
+      refetchArchivedChats();
+      setUnarchive(null);
     }
-  }, [isSuccess, deleteAllChatSuccess, selectedVoice]);
+    if (archiveSuccess) {
+      refetchChats();
+      refetchArchivedChats();
+    }
+  }, [isSuccess, deleteAllChatSuccess, unArchiveSuccess, archiveSuccess]);
 
   useEffect(() => {
-    const handleVoicesChanged = () => {
-      const availableVoices = speechSynthesis
-        .getVoices()
-        .filter((i) => i.localService === true);
-      setVoices(availableVoices);
-    };
-
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-      speechSynthesis.onvoiceschanged = handleVoicesChanged;
+    if (data && data.archivedChats) {
+      setArchivedChats(data.archivedChats);
     }
-    handleVoicesChanged();
-  }, []);
-
-  const handlePlay = () => {
-    if (selectedVoice) {
-      const utterance = new SpeechSynthesisUtterance(
-        "Hello, this is a test message."
-      );
-      const availableVoices = speechSynthesis.getVoices();
-      const fullVoice = availableVoices.find(
-        (voice) => voice.name === selectedVoice && voice.localService
-      );
-      utterance.voice = fullVoice;
-      speechSynthesis.speak(utterance);
-    }
-  };
+  }, [data]);
 
   const imageHandler = (e) => {
     const file = new FileReader();
@@ -188,7 +200,6 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       label: "Data controls",
       icon: <BsDatabaseFillGear />,
     },
-    { id: "speech", label: "Speech", icon: <BsSoundwave /> },
     { id: "security", label: "Security", icon: <MdSecurity /> },
   ];
 
@@ -260,13 +271,40 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
       ),
     },
     {
+      label: "Archived Chats",
+      control: (
+        <button
+          onClick={() => setManageTab("archived-chats")}
+          className="text-[#ececec] bg-transparent border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2"
+        >
+          Manage
+        </button>
+      ),
+    },
+    {
+      label: "Archive all chats",
+      control: (
+        <button
+          className="text-[#ececec] bg-transparent border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2"
+          onClick={() => {
+            setIsOpen(false);
+            setAction("archive");
+            setOpenConf(true);
+          }}
+        >
+          Archive All
+        </button>
+      ),
+    },
+    {
       label: "Delete all chats",
       control: (
         <button
           className="text-[#ececec] bg-red-500 border font-[500] border-[hsla(0,0%,100%,.15)] rounded-full text-sm px-3 py-2 hover:bg-red-600"
           onClick={() => {
             setIsOpen(false);
-            setOpenDeleteConf(true);
+            setAction("delete");
+            setOpenConf(true);
           }}
         >
           Delete All
@@ -331,12 +369,6 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     },
     { label: "Username", value: user?.username },
     { label: "Email", value: user?.email },
-    {
-      label: "Subscription",
-      value:
-        user?.subscription?.plan[0].toUpperCase() +
-        user?.subscription?.plan.slice(1),
-    },
     { label: "Last Login", value: new Date(user?.lastLogin).toLocaleString() },
     {
       control: (
@@ -377,49 +409,6 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     },
   ];
 
-  const voiceSettings = [
-    {
-      label: "Voice",
-      control: (
-        <div className="flex items-center gap-3">
-          <button
-            className="flex items-center gap-1 cursor-pointer"
-            onClick={handlePlay}
-          >
-            <RiPlayCircleLine className="w-5 h-5" />
-            <span className="relative block text-center text-sm outline-none bg-transparent">
-              Play
-            </span>
-          </button>
-          <span>|</span>
-          <div className="relative">
-            <Listbox value={selectedVoice} onChange={setSelectedVoice}>
-              <ListboxButton className="relative block w-full py-1.5 pr-8 pl-3 text-left text-sm text-black dark:text-white outline-none">
-                {selectedVoice || "Select a Voice"}
-                <ChevronDownIcon className="pointer-events-none absolute top-2.5 right-2.5 h-3 w-3 text-black dark:text-white" />
-              </ListboxButton>
-              <ListboxOptions className="absolute w-max z-30 mt-1 rounded-lg bg-[#222] p-1 focus:outline-none transition-opacity duration-150 ease-in-out overflow-auto max-h-48 hide-scrollbar">
-                {voices.map((voice, index) => (
-                  <ListboxOption
-                    key={index}
-                    value={voice.name}
-                    className={({ active, selected }) =>
-                      `flex cursor-pointer items-center gap-2 rounded-lg py-1.5 px-3 ${
-                        active ? "bg-[#333] text-white" : "text-white"
-                      }`
-                    }
-                  >
-                    {({ selected }) => <span>{voice.name}</span>}
-                  </ListboxOption>
-                ))}
-              </ListboxOptions>
-            </Listbox>
-          </div>
-        </div>
-      ),
-    },
-  ];
-
   const renderSharedLinksDialog = () => {
     const sortedLinks = [...sharedLinks].sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
@@ -436,10 +425,12 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
               <DialogTitle className="text-lg font-medium my-[.25rem] first:mt-[.25rem]">
                 Shared Links
               </DialogTitle>
-              <HiOutlineXMark
-                className="w-5 h-5 cursor-pointer"
+              <div
+                className="cursor-pointer hover:bg-[#666] p-1 rounded-full"
                 onClick={() => setManageTab("")}
-              />
+              >
+                <HiOutlineXMark className="w-5 h-5" />
+              </div>
             </div>
             <>
               {sortedLinks.length > 0 ? (
@@ -547,6 +538,136 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
     );
   };
 
+  const renderArchivedChatsDialog = () => {
+    const sortedLinks = [...archivedChats].sort(
+      (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+    );
+
+    return (
+      <Dialog
+        open={manageTab === "archived-chats"}
+        onClose={() => setManageTab("")}
+      >
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <DialogPanel className="relative bg-white dark:bg-[#2d2c2c] text-black dark:text-[#d5d5d5] rounded-2xl shadow-lg w-full max-w-2xl">
+            <div className="flex justify-between items-center p-4 border-b dark:border-[hsla(0,0%,100%,.1)]">
+              <DialogTitle className="text-lg font-medium my-[.25rem] first:mt-[.25rem]">
+                Archived Chats
+              </DialogTitle>
+              <div
+                className="cursor-pointer hover:bg-[#666] p-1 rounded-full"
+                onClick={() => setManageTab("")}
+              >
+                <HiOutlineXMark className="w-5 h-5" />
+              </div>
+            </div>
+            <>
+              {sortedLinks.length > 0 ? (
+                <div className="flex-grow overflow-y-auto p-4 sm:p-6">
+                  <div className="overflow-y-auto hide-scrollbar text-sm h-96">
+                    <table className="w-full border-separate border-spacing-0">
+                      <thead>
+                        <tr>
+                          <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-0 text-left">
+                            Name
+                          </th>
+                          <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-0 text-left">
+                            Date created
+                          </th>
+                          <th className="border-x-0 border-t-0 border-b-[0.5px] border-[hsla(0,0%,100%,.15)] bg-transparent py-2 font-semibold pr-4 last:pr-4 last:border-r-0 text-right">
+                            <button>
+                              <BsThreeDots />
+                            </button>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sortedLinks.map((link, index) => (
+                          <tr key={link._id}>
+                            <td
+                              className={`border-x-0 border-t-0 border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
+                                unarchive === link.chatId ? "text-white/50" : ""
+                              } ${
+                                index === sortedLinks.length - 1
+                                  ? "border-b-0"
+                                  : "border-b-[0.5px]"
+                              }`}
+                            >
+                              <div className="flex min-h-[40px] items-center">
+                                <Link
+                                  href={`/chat/${link._id}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className={`inline-flex items-center gap-2 align-top ${
+                                    unarchive === link._id
+                                      ? "text-white/50"
+                                      : "text-blue-500 dark:text-blue-400"
+                                  }`}
+                                >
+                                  <BsChat className="w-5 h-5" />
+                                  {link.title}
+                                </Link>
+                              </div>
+                            </td>
+                            <td
+                              className={`border-x-0 border-t-0 border-[hsla(0,0%,100%,.1)] align-top pr-4 text-left ${
+                                unarchive === link._id ? "text-white/50" : ""
+                              } ${
+                                index === sortedLinks.length - 1
+                                  ? "border-b-0"
+                                  : "border-b-[0.5px]"
+                              }`}
+                            >
+                              <div className="flex min-h-[40px] items-center">
+                                {dayjs(link.createdAt).format("MMMM D, YYYY")}
+                              </div>
+                            </td>
+                            <td
+                              className={`border-x-0 border-t-0 border-[hsla(0,0%,100%,.1)] align-top pr-4 text-right last:border-r-0 ${
+                                unarchive === link._id ? "text-white/50" : ""
+                              } ${
+                                index === sortedLinks.length - 1
+                                  ? "border-b-0"
+                                  : "border-b-[0.5px]"
+                              }`}
+                            >
+                              <div className="flex justify-end min-h-[40px] items-center">
+                                <div className="text-md flex items-center justify-end gap-2">
+                                  <button
+                                    onClick={() =>
+                                      handleUnarchiveWithFade(link._id)
+                                    }
+                                  >
+                                    <RiInboxUnarchiveLine className="w-5 h-5" />
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteLinkWithFade(link._id)
+                                    }
+                                  >
+                                    <BiTrash className="w-5 h-5" />
+                                  </button>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 text-sm h-[360px]">
+                  No archived chats available.
+                </div>
+              )}
+            </>
+          </DialogPanel>
+        </div>
+      </Dialog>
+    );
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "general":
@@ -597,23 +718,12 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
             ))}
           </div>
         );
-      case "speech":
+      default:
         return (
-          <div className="flex flex-col">
-            {voiceSettings.map((setting, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center text-sm py-2.5 border-b border-[hsla(0,0%,100%,.1)] last:border-none"
-              >
-                <span>{setting.label}</span>
-                <span className="p-1">{setting.value}</span>
-                {setting.control}
-              </div>
-            ))}
+          <div className="flex justify-center items-center h-full select-none">
+            Coming Soon
           </div>
         );
-      default:
-        return null;
     }
   };
 
@@ -658,16 +768,22 @@ const SettingsModal = ({ isOpen, setIsOpen, user, setUserLogout, refetch }) => {
         </div>
       </Dialog>
       {renderSharedLinksDialog()}
-      {openDeleteConf && (
+      {renderArchivedChatsDialog()}
+      {openConf && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-70" />
       )}
-      {openDeleteConf && (
-        <DeleteConfirmation
-          isOpen={openDeleteConf}
-          onClose={() => setOpenDeleteConf(false)}
+      {openConf && (
+        <Confirmation
+          action={action}
+          isOpen={openConf}
+          onClose={() => {
+            setOpenConf(false);
+            setAction("");
+          }}
           onConfirm={() => {
-            delAllChats();
-            setOpenDeleteConf(false);
+            action === "delete" ? delAllChats() : archiveAllChats();
+            setOpenConf(false);
+            setAction("");
           }}
         />
       )}

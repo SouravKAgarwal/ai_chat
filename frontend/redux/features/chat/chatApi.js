@@ -3,11 +3,10 @@ import { apiSlice } from "../api/apiSlices";
 export const chatApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createChat: builder.mutation({
-      query: ({ userId, prompt, file, image }) => ({
+      query: ({ prompt, file, image }) => ({
         url: "chat",
         method: "POST",
         body: {
-          userId,
           prompt,
           file,
           image,
@@ -49,12 +48,11 @@ export const chatApi = apiSlice.injectEndpoints({
       }),
     }),
     shareChat: builder.mutation({
-      query: ({ chatId, userId }) => ({
+      query: ({ chatId }) => ({
         url: "chat/share",
         method: "POST",
         body: {
           chatId,
-          userId,
         },
         credentials: "include",
       }),
@@ -74,12 +72,9 @@ export const chatApi = apiSlice.injectEndpoints({
       }),
     }),
     deleteAllChats: builder.mutation({
-      query: ({ userId }) => ({
+      query: () => ({
         url: `chat/all`,
         method: "DELETE",
-        body: {
-          userId,
-        },
         credentials: "include",
       }),
     }),
@@ -94,9 +89,36 @@ export const chatApi = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    archiveChat: builder.mutation({
+      query: (chatId) => ({
+        url: `chat/archive`,
+        method: "PUT",
+        body: {
+          chatId,
+        },
+        credentials: "include",
+      }),
+    }),
+    unArchiveChat: builder.mutation({
+      query: (chatId) => ({
+        url: `chat/unarchive`,
+        method: "PUT",
+        body: {
+          chatId,
+        },
+        credentials: "include",
+      }),
+    }),
+    getArchivedChats: builder.query({
+      query: () => ({
+        url: "chat/archived-chats",
+        method: "GET",
+        credentials: "include",
+      }),
+    }),
     getChatsByUserId: builder.query({
-      query: ({ userId }) => ({
-        url: `chat/user/${userId}`,
+      query: () => ({
+        url: `chat/user`,
         method: "GET",
         credentials: "include",
       }),
@@ -130,4 +152,7 @@ export const {
   useDeleteChatMutation,
   useDeleteAllChatsMutation,
   useDeleteShareChatMutation,
+  useArchiveChatMutation,
+  useUnArchiveChatMutation,
+  useGetArchivedChatsQuery,
 } = chatApi;

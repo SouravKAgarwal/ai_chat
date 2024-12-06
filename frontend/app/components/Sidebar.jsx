@@ -1,6 +1,5 @@
 import removeMarkdown from "markdown-to-text";
 import Link from "next/link";
-import { FaRainbow } from "react-icons/fa";
 import { PiDotsThreeBold } from "react-icons/pi";
 import SettingsModal from "./profile/Settings";
 import { useEffect, useState } from "react";
@@ -18,8 +17,11 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
+import { RiArchive2Line } from "react-icons/ri";
 import { FiShare, FiEdit2, FiTrash2 } from "react-icons/fi";
 import {
+  useArchiveChatMutation,
+  useGetArchivedChatsQuery,
   useRenameChatMutation,
   useShareChatMutation,
 } from "@/redux/features/chat/chatApi";
@@ -32,6 +34,7 @@ const Sidebar = ({
   toggleSidebar,
   conversation,
   handleDelete,
+  refetchChats,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [login, setLogin] = useState(false);
@@ -52,6 +55,11 @@ const Sidebar = ({
   const { isSuccess } = useLogoutQuery(undefined, { skip: !userLogout });
   const [shareChat, { isSuccess: shareChatSuccess }] = useShareChatMutation();
   const [renameChat] = useRenameChatMutation();
+  const [archiveChat, { isSuccess: archiveSuccess }] = useArchiveChatMutation();
+  const { refetch: refetchArchivedChats } = useGetArchivedChatsQuery(
+    {},
+    { refetchOnMountOrArgChange: true }
+  );
 
   const handleCreateLink = async () => {
     try {
@@ -73,12 +81,25 @@ const Sidebar = ({
     if (shareChatSuccess) {
       refetch();
     }
-  }, [isSuccess, shareChatSuccess]);
+    if (archiveSuccess) {
+      refetchChats();
+      refetchArchivedChats();
+    }
+  }, [isSuccess, shareChatSuccess, archiveSuccess]);
 
   const handleRename = (chatId) => {
     setEditingChatId(chatId);
     const chat = conversation.find((c) => c._id === chatId);
     setNewTitle(chat?.title || "");
+  };
+
+  const handleArchive = async (chatId) => {
+    try {
+      await archiveChat(chatId);
+      toast.success("Chat archived");
+    } catch (err) {
+      toast.error("Failed to archive.");
+    }
   };
 
   const handleRenameSubmit = async () => {
@@ -167,6 +188,16 @@ const Sidebar = ({
                         >
                           <FiEdit2 className="mr-2" />
                           Rename
+                        </ListboxOption>
+                        <ListboxOption
+                          className="flex items-center px-3 py-2 cursor-pointer border-b border-[hsla(0,0%,100%,.15)] hover:bg-[#444] text-sm"
+                          value="share"
+                          onClick={() => {
+                            handleArchive(chat._id);
+                          }}
+                        >
+                          <RiArchive2Line className="mr-2" />
+                          Archive
                         </ListboxOption>
                         <ListboxOption
                           className="flex items-center px-3 py-2 cursor-pointer text-red-500 hover:bg-[#444] text-sm"
@@ -269,7 +300,7 @@ const Sidebar = ({
               onClick={() => setIsOpen(true)}
             >
               <div className="w-10 h-10 flex items-center justify-center overflow-hidden rounded-full  hover:bg-[#2f2f2f] focus-visible:bg-[#2f2f2f]">
-                <div className="relative flex">
+                <div className="w-8 h-8 relative flex">
                   {user?.profileImage ? (
                     <Image
                       width={32}
@@ -322,6 +353,7 @@ const Sidebar = ({
         user={user}
         setUserLogout={setUserLogout}
         refetch={refetch}
+        refetchChats={refetchChats}
       />
       <ShareDialog
         shareOpen={shareOpen}

@@ -46,6 +46,8 @@ const chatSchema = new mongoose.Schema(
     },
     title: { type: String, required: true },
     conversation: [messageSchema],
+    isArchived: { type: Boolean, required: true, default: false },
+    isShared: { type: Boolean, required: true, default: false },
     usageMetadata: {
       promptTokenCount: { type: Number },
       candidatesTokenCount: { type: Number },

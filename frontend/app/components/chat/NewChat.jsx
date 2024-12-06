@@ -32,9 +32,7 @@ const NewChat = ({ user }) => {
     isLoading,
     refetch,
   } = useGetChatsByUserIdQuery(
-    {
-      userId: user?._id,
-    },
+    { userId: user?._id },
     { refetchOnMountOrArgChange: true }
   );
 
@@ -146,6 +144,7 @@ const NewChat = ({ user }) => {
         toggleSidebar={toggleSidebar}
         conversation={chats}
         isLoading={isLoading}
+        refetchChats={refetch}
         handleDelete={handleDelete}
       />
       <div
@@ -153,7 +152,11 @@ const NewChat = ({ user }) => {
           sidebarOpen && "ml-0 sm:ml-48 md:ml-64"
         }`}
       >
-        <Navbar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        <Navbar
+          sidebarOpen={sidebarOpen}
+          toggleSidebar={toggleSidebar}
+          refetchChats={refetch}
+        />
         <div className="flex flex-col h-full overflow-auto">
           <div className="flex-1 overflow-y-auto hide-scrollbar">
             <ChatWindow

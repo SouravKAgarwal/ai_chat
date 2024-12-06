@@ -1,6 +1,6 @@
 import Markdown from "markdown-to-jsx";
 import removeMarkdown from "markdown-to-text";
-import CodeSandbox from "../components/chat/CodeBlock";
+import CodeBlock from "../components/chat/CodeBlock";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { toast } from "sonner";
 import { HiOutlineSpeakerWave, HiOutlineSpeakerXMark } from "react-icons/hi2";
@@ -71,7 +71,7 @@ export const formatResponse = (
     ? text.replace(explanationMatch[0], "").trim()
     : text;
 
-  const codeBlockRegex = /```([a-zA-Z0-9_+\-]*)\n([\s\S]*?)```/g;
+  const codeBlockRegex = /```([a-zA-Z0-9_+\-]*)?\n([\s\S]*?)```/g;
 
   const parts = [];
   let lastIndex = 0;
@@ -108,7 +108,7 @@ export const formatResponse = (
             </CopyToClipboard>
           </div>
         )}
-        <CodeSandbox code={codeContent} />
+        <CodeBlock code={codeContent} />
       </div>
     );
 
@@ -307,26 +307,55 @@ export function categorizeChatsByDate(chats) {
     older: [],
   };
 
-  chats.forEach((chat) => {
-    const updatedAt = new Date(chat.updatedAt);
+  const processedChats = new Set();
 
-    if (updatedAt >= todayStart) {
+  chats.forEach((chat) => {
+    if (processedChats.has(chat) || chat.isArchived || !chat.conversation)
+      return;
+
+    const latestUpdatedAt = chat.conversation.reduce((latest, conversation) => {
+      const updatedAt = new Date(conversation.updatedAt);
+      return updatedAt > latest ? updatedAt : latest;
+    }, new Date(0));
+
+    if (latestUpdatedAt >= todayStart) {
       categories.today.push(chat);
-    } else if (updatedAt >= yesterdayStart && updatedAt < todayStart) {
+    } else if (
+      latestUpdatedAt >= yesterdayStart &&
+      latestUpdatedAt < todayStart
+    ) {
       categories.yesterday.push(chat);
-    } else if (updatedAt >= sevenDaysAgo && updatedAt < yesterdayStart) {
+    } else if (
+      latestUpdatedAt >= sevenDaysAgo &&
+      latestUpdatedAt < yesterdayStart
+    ) {
       categories.last7days.push(chat);
-    } else if (updatedAt >= thirtyDaysAgo && updatedAt < sevenDaysAgo) {
+    } else if (
+      latestUpdatedAt >= thirtyDaysAgo &&
+      latestUpdatedAt < sevenDaysAgo
+    ) {
       categories.last30days.push(chat);
     } else {
       categories.older.push(chat);
     }
+
+    processedChats.add(chat);
   });
 
   Object.keys(categories).forEach((category) => {
-    categories[category].sort(
-      (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
-    );
+    categories[category].sort((a, b) => {
+      const latestA = a.conversation.reduce(
+        (latest, c) =>
+          new Date(c.updatedAt) > latest ? new Date(c.updatedAt) : latest,
+        new Date(0)
+      );
+      const latestB = b.conversation.reduce(
+        (latest, c) =>
+          new Date(c.updatedAt) > latest ? new Date(c.updatedAt) : latest,
+        new Date(0)
+      );
+      return new Date(latestB) - new Date(latestA);
+    });
   });
 
   return categories;

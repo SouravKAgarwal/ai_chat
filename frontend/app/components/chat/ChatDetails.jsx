@@ -80,6 +80,7 @@ const ChatDetails = ({ chatId }) => {
         conversation={chats}
         isLoading={isLoading}
         handleDelete={handleDelete}
+        refetchChats={refetch}
       />
       <div
         className={`w-full transition-all duration-300 flex-1 flex flex-col ${
@@ -91,6 +92,7 @@ const ChatDetails = ({ chatId }) => {
           sidebarOpen={sidebarOpen}
           toggleSidebar={toggleSidebar}
           chatId={chatId}
+          refetchChats={refetch}
         />
         <ChatDetailsPage
           chatId={chatId}

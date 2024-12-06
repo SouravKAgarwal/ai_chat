@@ -15,7 +15,7 @@ import { useShareChatMutation } from "@/redux/features/chat/chatApi";
 import ShareDialog from "./chat/ShareDialog";
 import { useLoadUserQuery } from "@/redux/features/api/apiSlices";
 
-const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
+const Navbar = ({ sidebarOpen, toggleSidebar, chatId, refetchChats }) => {
   const [userLogout, setUserLogout] = useState(false);
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
@@ -102,7 +102,10 @@ const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
           {user ? (
             <button className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[#2f2f2f] focus-visible:bg-[#2f2f2f] focus-visible:outline-0">
               <div className="flex items-center justify-center overflow-hidden rounded-full">
-                <div className="relative flex" onClick={() => setIsOpen(true)}>
+                <div
+                  className="w-8 h-8 relative flex"
+                  onClick={() => setIsOpen(true)}
+                >
                   {user?.profileImage ? (
                     <Image
                       width={32}
@@ -151,6 +154,7 @@ const Navbar = ({ sidebarOpen, toggleSidebar, chatId }) => {
         user={user}
         setUserLogout={setUserLogout}
         refetch={refetch}
+        refetchChats={refetchChats}
       />
       <ShareDialog
         shareOpen={shareOpen}

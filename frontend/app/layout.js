@@ -9,7 +9,7 @@ import { useLoadUserQuery } from "@/redux/features/api/apiSlices";
 import Loading from "./components/Loading";
 
 const lato = Lato({
-  weight: ["300", "400", "700"],
+  weight: ["100", "300", "400", "700", "900"],
   subsets: ["latin"],
 });
 
